@@ -43,6 +43,29 @@ impl<'c> PartialEq for &'c dyn Currency {
     }
 }
 
+/// Used as a trait bound when constructing new instances of Money
+/// from minor units.
+pub trait MinorUnits {
+    fn minor_units(&self) -> u32;
+}
+
+/// Blanket implementation for any [Currency]
+impl<C> MinorUnits for C
+where
+    C: Currency,
+{
+    fn minor_units(&self) -> u32 {
+        self.minor_units()
+    }
+}
+
+/// Implementation for an `&dyn Currency`.
+impl<'c> MinorUnits for &'c dyn Currency {
+    fn minor_units(&self) -> u32 {
+        (*self).minor_units()
+    }
+}
+
 /// An amount of money in a particular currency.
 #[derive(Debug, Clone)]
 pub struct Money<C> {
@@ -57,12 +80,28 @@ impl<C> Money<C> {
     /// Currency instance, or a dynamically-typed reference
     /// to a Currency instance (i.e., `&dyn Currency`).
     pub fn new(amount: Decimal, currency: C) -> Self {
-        Money { amount, currency }
+        Self { amount, currency }
     }
 
     /// Returns a copy of the amount as a Decimal.
     pub fn amount(&self) -> Decimal {
         self.amount
+    }
+}
+
+/// Method that require knowing the `minor_units` of the currency.
+impl<C> Money<C>
+where
+    C: MinorUnits,
+{
+    /// Constructs a Money from some number of minor units in the
+    /// specified Currency. For example, 100 USD minor units is one USD,
+    /// but 100 JPY minor units is 100 JPY.
+    pub fn from_minor_units(minor_units: i64, currency: C) -> Self {
+        Self {
+            amount: Decimal::new(minor_units, currency.minor_units()),
+            currency,
+        }
     }
 }
 
@@ -79,19 +118,6 @@ where
 
 /// Functions specifically for borrowed dynamically-typed currencies.
 impl<'c> Money<&'c dyn Currency> {
-    /// Constructs a Money from some number of minor units in the
-    /// specified Currency. For example, 100 USD minor units is one USD,
-    /// but 100 JPY minor units is 100 JPY.
-    pub fn from_minor_units(
-        minor_units: i64,
-        currency: &'c dyn Currency,
-    ) -> Money<&'c dyn Currency> {
-        Money {
-            amount: Decimal::new(minor_units, currency.minor_units()),
-            currency,
-        }
-    }
-
     /// Returns the reference to the dynamically-typed Currency.
     pub fn currency(&self) -> &'c dyn Currency {
         self.currency
@@ -283,17 +309,18 @@ mod tests {
 
     #[test]
     fn from_minor_units() {
-        let m1 = Money::from_minor_units(100, &USD);
+        let m1 = Money::from_minor_units(100, USD);
         assert_eq!(m1.amount(), Decimal::ONE);
-        assert_eq!(m1.currency(), &USD);
+        assert_eq!(m1.currency(), USD);
 
-        let m2 = Money::from_minor_units(100, &JPY);
+        let m2 = Money::from_minor_units(100, JPY);
         assert_eq!(m2.amount(), Decimal::ONE_HUNDRED);
-        assert_eq!(m2.currency(), &JPY);
+        assert_eq!(m2.currency(), JPY);
 
-        let m3 = Money::from_minor_units(100, &JPY);
+        let currency_jpy = CURRENCIES.get("JPY").unwrap();
+        let m3 = Money::from_minor_units(100, currency_jpy);
         assert_eq!(m3.amount(), Decimal::ONE_HUNDRED);
-        assert_eq!(m3.currency(), &JPY);
+        assert_eq!(m3.currency(), currency_jpy);
     }
 
     #[test]
