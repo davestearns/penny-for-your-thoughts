@@ -257,6 +257,21 @@ mod tests {
     }
 
     #[test]
+    fn from_minor_units() {
+        let m1 = Money::from_minor_units(100, &USD);
+        assert_eq!(m1.amount(), Decimal::ONE);
+        assert_eq!(m1.currency(), &USD);
+
+        let m2 = Money::from_minor_units(100, &JPY);
+        assert_eq!(m2.amount(), Decimal::ONE_HUNDRED);
+        assert_eq!(m2.currency(), &JPY);
+
+        let m3 = Money::from_minor_units(100, &JPY);
+        assert_eq!(m3.amount(), Decimal::ONE_HUNDRED);
+        assert_eq!(m3.currency(), &JPY);
+    }
+
+    #[test]
     fn equality_dynamic() {
         assert_eq!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
