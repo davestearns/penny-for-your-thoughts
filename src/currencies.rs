@@ -10,6 +10,10 @@ impl Currency for USD {
     fn minor_units(&self) -> u32 {
         2
     }
+
+    fn symbol(&self) -> &'static str {
+        "$"
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -21,5 +25,9 @@ impl Currency for JPY {
 
     fn minor_units(&self) -> u32 {
         0
+    }
+
+    fn symbol(&self) -> &'static str {
+        "¥"
     }
 }

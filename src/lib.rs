@@ -3,16 +3,26 @@ use std::ops::Add;
 use rust_decimal::Decimal;
 use thiserror::Error;
 
-/// Definitions for various currencies.
+/// Various Currency definitions
 pub mod currencies;
 
-/// CurrencyMap
+/// The CurrencyMap, which provides `currency code -> &dyn Currency` lookup.
 pub mod currency_map;
 
 /// Common trait for all currencies.
 pub trait Currency: Send + Sync {
+    /// Returns the unique alphabetic code for this currency
+    /// (e.g., "USD" or "JPY").
     fn code(&self) -> &'static str;
+    /// Returns the number of minor units supported by the currency.
+    /// Currencies like USD and EUR currently support 2, but others
+    /// like JPY or KRW support zero.
     fn minor_units(&self) -> u32;
+    /// Returns the symbol used to represent this currency.
+    /// For example `$` for USD or `¥` for JPY. Some currencies
+    /// use a series of letters instead of a special symbol
+    /// (e.g., `CHF` or `Lek`).
+    fn symbol(&self) -> &'static str;
 }
 
 /// Debug output for a dynamically-typed Currency.
@@ -59,8 +69,9 @@ impl<C> Money<C> {
 /// Functions specifically for owned statically-typed Currency instances.
 impl<C> Money<C>
 where
-    C: Currency + Copy,
+    C: Currency + Copy, // owned Currency instances can be Copy
 {
+    /// Returns a copy of the Money's Currency.
     pub fn currency(&self) -> C {
         self.currency
     }
@@ -68,6 +79,9 @@ where
 
 /// Functions specifically for borrowed dynamically-typed currencies.
 impl<'c> Money<&'c dyn Currency> {
+    /// Constructs a Money from some number of minor units in the
+    /// specified Currency. For example, 100 USD minor units is one USD,
+    /// but 100 JPY minor units is 100 JPY.
     pub fn from_minor_units(
         minor_units: i64,
         currency: &'c dyn Currency,
@@ -151,8 +165,8 @@ pub enum MoneyMathError {
 }
 
 /// Adds two Money instances with dynamically-typed currencies.
-/// The Output is a Result instead a Money since the operation can
-/// fail if the currencies are incompatible.
+/// The Output is a Result instead of a Money since the operation
+/// can fail if the currencies are incompatible.
 impl<'c> Add for Money<&'c dyn Currency> {
     type Output = Result<Self, MoneyMathError>;
 
@@ -172,7 +186,7 @@ impl<'c> Add for Money<&'c dyn Currency> {
 }
 
 /// Adds a Money instance with a dynamically-typed Currency to
-/// a Money instance with a statically-typed Currency. The output
+/// a Money instance with a statically-typed Currency. The Output
 /// is a Result since the operation can fail if the currencies are
 /// incompatible.
 impl<'c, C> Add<Money<C>> for Money<&'c dyn Currency>
