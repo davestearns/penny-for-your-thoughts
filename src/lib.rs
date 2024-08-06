@@ -49,7 +49,7 @@ pub trait MinorUnits {
     fn minor_units(&self) -> u32;
 }
 
-/// Blanket implementation for any [Currency]
+/// Blanket implementation for any static [Currency] instance.
 impl<C> MinorUnits for C
 where
     C: Currency,
