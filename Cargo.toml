@@ -1,0 +1,8 @@
+[package]
+name = "penny-for-your-thoughts"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rust_decimal = "1.35.0"
+thiserror = "1.0.63"
