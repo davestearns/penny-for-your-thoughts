@@ -333,6 +333,13 @@ mod tests {
             Money::new(Decimal::ONE, JPY) + Money::new(Decimal::ONE, JPY),
             Money::new(Decimal::TWO, JPY),
         );
+        assert_eq!(
+            Money::new(Decimal::ONE, USD)
+                + Money::new(Decimal::ONE, USD)
+                + Money::new(Decimal::ONE, USD),
+            Money::new(Decimal::new(3, 0), USD),
+        );
+
         // this won't compile...
         // let x = Money::new(Decimal::ONE, USD) + Money::new(Decimal::ONE, JPY);
     }
@@ -365,6 +372,22 @@ mod tests {
             Err(MoneyMathError::IncompatibleCurrencies(
                 currency_jpy.code(),
                 currency_usd.code(),
+            )),
+        );
+
+        // To add more than two instances together, use `Result.and_then()`, which
+        // will skip the closure when the initial Result in an error.
+        assert_eq!(
+            (Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_usd))
+                .and_then(|m| m + Money::new(Decimal::ONE, currency_usd)),
+            Ok(Money::new(Decimal::new(3, 0), currency_usd)),
+        );
+        assert_eq!(
+            (Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_jpy))
+                .and_then(|m| m + Money::new(Decimal::ONE, currency_usd)),
+            Err(MoneyMathError::IncompatibleCurrencies(
+                currency_usd.code(),
+                currency_jpy.code()
             )),
         );
     }
