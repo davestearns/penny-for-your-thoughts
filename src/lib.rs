@@ -245,7 +245,7 @@ mod tests {
     use rust_decimal::Decimal;
 
     const CURRENCIES: LazyLock<CurrencyMap> =
-        LazyLock::new(|| CurrencyMap::from_slice([&USD as &dyn Currency, &JPY]));
+        LazyLock::new(|| CurrencyMap::from_collection([&USD as &dyn Currency, &JPY]));
 
     #[test]
     fn new_static() {

@@ -14,7 +14,7 @@ impl<'c> CurrencyMap<'c> {
         }
     }
 
-    pub fn from_slice<I>(currencies: I) -> Self
+    pub fn from_collection<I>(currencies: I) -> Self
     where
         I: IntoIterator<Item = &'c dyn Currency>,
     {
