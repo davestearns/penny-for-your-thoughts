@@ -96,6 +96,17 @@ where
 }
 
 /// Allows equality comparisons between Money instances with dynamically-typed
+/// currencies and those with statically-typed currencies
+impl<'c, C> PartialEq<Money<&'c dyn Currency>> for Money<C>
+where
+    C: Currency + PartialEq,
+{
+    fn eq(&self, other: &Money<&'c dyn Currency>) -> bool {
+        self.amount == other.amount && self.currency.code() == other.currency.code()
+    }
+}
+
+/// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies.
 impl<'c> PartialEq for Money<&'c dyn Currency> {
     fn eq(&self, other: &Self) -> bool {
@@ -306,8 +317,16 @@ mod tests {
             Money::new(Decimal::ONE, USD),
         );
         assert_eq!(
+            Money::new(Decimal::ONE, USD),
+            Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
+        );
+        assert_eq!(
             Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
             Money::new(Decimal::ONE, JPY),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, JPY),
+            Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
