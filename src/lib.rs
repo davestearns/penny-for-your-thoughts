@@ -133,7 +133,7 @@ where
 
 /// Errors that can occur when doing math with Money instances that
 /// have dynamically-typed currencies
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Clone)]
 pub enum MoneyMathError {
     #[error("the money instances have incompatible currencies ({0}, {1})")]
     IncompatibleCurrencies(&'static str, &'static str),
@@ -210,27 +210,27 @@ mod tests {
     fn equality_dynamic() {
         assert_eq!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
-            Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap())
+            Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
         );
         assert_eq!(
             Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
-            Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap())
+            Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
-            Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap())
+            Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
-            Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap())
+            Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
-            Money::new(Decimal::TWO, CURRENCIES.get("USD").unwrap())
+            Money::new(Decimal::TWO, CURRENCIES.get("USD").unwrap()),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
-            Money::new(Decimal::TWO, CURRENCIES.get("JPY").unwrap())
+            Money::new(Decimal::TWO, CURRENCIES.get("JPY").unwrap()),
         );
     }
 
@@ -238,23 +238,69 @@ mod tests {
     fn equality_mixed() {
         assert_eq!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
-            Money::new(Decimal::ONE, USD)
+            Money::new(Decimal::ONE, USD),
         );
         assert_eq!(
             Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
-            Money::new(Decimal::ONE, JPY)
+            Money::new(Decimal::ONE, JPY),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
-            Money::new(Decimal::ONE, JPY)
+            Money::new(Decimal::ONE, JPY),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap()),
-            Money::new(Decimal::ONE, USD)
+            Money::new(Decimal::ONE, USD),
         );
         assert_ne!(
             Money::new(Decimal::ONE, CURRENCIES.get("USD").unwrap()),
-            Money::new(Decimal::TWO, USD)
+            Money::new(Decimal::TWO, USD),
+        );
+    }
+
+    #[test]
+    fn add_static() {
+        assert_eq!(
+            Money::new(Decimal::ONE, USD) + Money::new(Decimal::ONE, USD),
+            Money::new(Decimal::TWO, USD),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, JPY) + Money::new(Decimal::ONE, JPY),
+            Money::new(Decimal::TWO, JPY),
+        );
+        // this won't compile...
+        // let x = Money::new(Decimal::ONE, USD) + Money::new(Decimal::ONE, JPY);
+    }
+
+    #[test]
+    fn add_dynamic() {
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        let currency_jpy = CURRENCIES.get("JPY").unwrap();
+
+        // Attempting to add compatible currencies should produce the correct Ok result.
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_usd),
+            Ok(Money::new(Decimal::TWO, currency_usd)),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_jpy) + Money::new(Decimal::ONE, currency_jpy),
+            Ok(Money::new(Decimal::TWO, currency_jpy)),
+        );
+
+        // Attempting to add incompatible currencies should produce an error.
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_jpy),
+            Err(MoneyMathError::IncompatibleCurrencies(
+                currency_usd.code(),
+                currency_jpy.code(),
+            )),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_jpy) + Money::new(Decimal::ONE, currency_usd),
+            Err(MoneyMathError::IncompatibleCurrencies(
+                currency_jpy.code(),
+                currency_usd.code(),
+            )),
         );
     }
 }
