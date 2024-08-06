@@ -160,6 +160,56 @@ impl<'c> Add for Money<&'c dyn Currency> {
     }
 }
 
+/// Adds a Money instance with a dynamically-typed Currency to
+/// a Money instance with a statically-typed Currency. The output
+/// is a Result since the operation can fail if the currencies are
+/// incompatible.
+impl<'c, C> Add<Money<C>> for Money<&'c dyn Currency>
+where
+    C: Currency,
+{
+    type Output = Result<Self, MoneyMathError>;
+
+    fn add(self, rhs: Money<C>) -> Self::Output {
+        if self.currency.code() == rhs.currency.code() {
+            Ok(Self {
+                amount: self.amount + rhs.amount,
+                currency: self.currency,
+            })
+        } else {
+            Err(MoneyMathError::IncompatibleCurrencies(
+                self.currency.code(),
+                rhs.currency.code(),
+            ))
+        }
+    }
+}
+
+/// Adds a Money instance with a statically-typed Currency to
+/// a Money instance with a dynamically-typed Currency. The output
+/// is a Result since the operation can fail if the currencies are
+/// incompatible.
+impl<'c, C> Add<Money<&'c dyn Currency>> for Money<C>
+where
+    C: Currency,
+{
+    type Output = Result<Self, MoneyMathError>;
+
+    fn add(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
+        if self.currency.code() == rhs.currency.code() {
+            Ok(Self {
+                amount: self.amount + rhs.amount,
+                currency: self.currency,
+            })
+        } else {
+            Err(MoneyMathError::IncompatibleCurrencies(
+                self.currency.code(),
+                rhs.currency.code(),
+            ))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::LazyLock;
@@ -300,6 +350,47 @@ mod tests {
             Err(MoneyMathError::IncompatibleCurrencies(
                 currency_jpy.code(),
                 currency_usd.code(),
+            )),
+        );
+    }
+
+    #[test]
+    fn add_mixed() {
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        let currency_jpy = CURRENCIES.get("JPY").unwrap();
+
+        // Attempting to add compatible currencies should produce the correct Ok result.
+        // The Ok type should be the same as the left-hand side.
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, USD),
+            Ok(Money::new(Decimal::TWO, currency_usd)),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_jpy) + Money::new(Decimal::ONE, JPY),
+            Ok(Money::new(Decimal::TWO, currency_jpy)),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, JPY) + Money::new(Decimal::ONE, currency_jpy),
+            Ok(Money::new(Decimal::TWO, JPY)),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, USD) + Money::new(Decimal::ONE, currency_usd),
+            Ok(Money::new(Decimal::TWO, USD)),
+        );
+
+        // Attempting to add incompatible currencies should produce an error result.
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, JPY),
+            Err(MoneyMathError::IncompatibleCurrencies(
+                currency_usd.code(),
+                JPY.code()
+            )),
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, USD) + Money::new(Decimal::ONE, currency_jpy),
+            Err(MoneyMathError::IncompatibleCurrencies(
+                USD.code(),
+                currency_jpy.code()
             )),
         );
     }
