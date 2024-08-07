@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use rust_decimal::Decimal;
 use thiserror::Error;
@@ -502,6 +502,33 @@ where
     }
 }
 
+/// Negates Money instances with statically-typed currencies.
+impl<C> Neg for Money<C>
+where
+    C: Currency,
+{
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            amount: -self.amount,
+            currency: self.currency,
+        }
+    }
+}
+
+/// Negates Money instances with dynamically-typed currencies.
+impl<'c> Neg for Money<&'c dyn Currency> {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            amount: -self.amount,
+            currency: self.currency,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::LazyLock;
@@ -835,11 +862,11 @@ mod tests {
         // static
         assert_eq!(
             Money::new(Decimal::TEN, USD) / Money::new(Decimal::TWO, USD),
-            Money::new(Decimal::new(5,0), USD)
+            Money::new(Decimal::new(5, 0), USD)
         );
         assert_eq!(
             Money::new(Decimal::TWO, USD) / Money::new(Decimal::TEN, USD),
-            Money::new(Decimal::new(2,1), USD)
+            Money::new(Decimal::new(2, 1), USD)
         );
 
         //dynamic, same currency
@@ -848,11 +875,11 @@ mod tests {
 
         assert_eq!(
             Money::new(Decimal::TEN, currency_usd) / Money::new(Decimal::TWO, currency_usd),
-            Ok(Money::new(Decimal::new(5,0), currency_usd))
+            Ok(Money::new(Decimal::new(5, 0), currency_usd))
         );
         assert_eq!(
             Money::new(Decimal::TWO, currency_usd) / Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::new(2,1), currency_usd))
+            Ok(Money::new(Decimal::new(2, 1), currency_usd))
         );
 
         // dynamic, different currencies
@@ -864,11 +891,11 @@ mod tests {
         // mixed, same currency
         assert_eq!(
             Money::new(Decimal::TEN, currency_usd) / Money::new(Decimal::TWO, USD),
-            Ok(Money::new(Decimal::new(5,0), currency_usd))
+            Ok(Money::new(Decimal::new(5, 0), currency_usd))
         );
         assert_eq!(
             Money::new(Decimal::TWO, USD) / Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::new(2,1), USD))
+            Ok(Money::new(Decimal::new(2, 1), USD))
         );
 
         // mixed, different currencies
@@ -879,6 +906,22 @@ mod tests {
         assert_eq!(
             Money::new(Decimal::TEN, currency_jpy) / Money::new(Decimal::TWO, USD),
             Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+        );
+    }
+
+    #[test]
+    fn negate() {
+        // static
+        assert_eq!(
+            -Money::new(Decimal::ONE, USD),
+            Money::new(Decimal::NEGATIVE_ONE, USD)
+        );
+
+        // dynamic
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        assert_eq!(
+            -Money::new(Decimal::ONE, currency_usd),
+            Money::new(Decimal::NEGATIVE_ONE, currency_usd)
         );
     }
 }
