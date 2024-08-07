@@ -88,6 +88,11 @@ impl<C> Money<C> {
     pub fn amount(&self) -> Decimal {
         self.amount
     }
+
+    /// Returns true if the amount is zero.
+    pub fn is_zero(&self) -> bool {
+        self.amount.is_zero()
+    }
 }
 
 /// Methods that require knowing the `minor_units` of the currency.
@@ -589,6 +594,12 @@ mod tests {
         let m3 = Money::from_minor_units(100, currency_jpy);
         assert_eq!(m3.amount(), Decimal::ONE_HUNDRED);
         assert_eq!(m3.currency(), currency_jpy);
+    }
+
+    #[test]
+    fn is_zero() {
+        assert!(Money::new(Decimal::ZERO, USD).is_zero());
+        assert!(Money::new(Decimal::ZERO, CURRENCIES.get("USD").unwrap()).is_zero());
     }
 
     #[test]

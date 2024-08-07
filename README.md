@@ -548,7 +548,7 @@ I still need to finish the following:
 
 * **Currency Formatting:** There is a very simple and naive `Display` implementation, but proper locale-sensitive formatting requires a lot more sophistication.
 * **ISO 4217 Currency Definitions:** We could include a module with all the ISO 4217 currency definitions, but these do change over time, so we'd need to keep them up to date.
-* **Helper Methods:** Might be useful to add various helpers like `is_zero()` and `split()` for minor-unit aware splitting (e.g., remainder pennies gets assigned to a subset of the buckets).
+* **Helper Methods:** Might be useful to add various helpers `split()` for minor-unit aware splitting (e.g., remainder pennies gets assigned to a subset of the buckets).
 
 ## Corrections or Suggestions?
 
