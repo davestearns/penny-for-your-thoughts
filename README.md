@@ -101,9 +101,13 @@ pub struct Money<C> {
 }
 ```
 
-We define a generic type argument `C` for the currency, but notice that I don't add a trait bound here in the struct definition. That is, I just declare `Money<C>` not `Money<C: Currency>`. When I first started learning Rust I tended to add trait bounds on my `struct` definitions, but I realized this was both unnecessary and restrictive. Since you must add trait bounds on the `impl` blocks when referring to trait methods, and because they only way to create or interact with the type is through methods defined in the `impl` blocks, it's actually unnecessary to add trait bounds on the struct itself. But it's also overly restrictive: we don't want to restrict `C` to be only a `Currency` as we also want to support an `&dyn Currency` or maybe even a `Box<dyn Currency>`. We can do that using separate `impl` blocks with different trait bounds and types for `C`.
+We define a generic type argument `C` for the currency, but notice that I don't add a trait bound here in the struct definition. That is, I just declare `Money<C>` not `Money<C: Currency>`. When I first started learning Rust I tended to add trait bounds on my `struct` definitions, but I realized this was both unnecessary and restrictive. Since you must add trait bounds on the `impl` blocks when referring to trait methods, and because they only way to create or interact with the type is through methods defined in the `impl` blocks, it's typically unnecessary to add trait bounds on the struct itself. But it's also overly restrictive: we don't want to restrict `C` to be only a `Currency` as we also want to support an `&dyn Currency` or maybe even a `Box<dyn Currency>`. We can do that using separate `impl` blocks with different trait bounds and types for `C`.
 
-The first `impl` block should be for methods that don't really care what type `C` actually is:
+At first I tried to construct a single impl block with a trait bound that allowed either an owned `Currency` implementation OR a reference to a dynamic `Currency`, but that doesn't actually make sense, as an `&dyn Currency` is actually a _type_ not a _trait_, so it can't be used as a trait bound. But it can be used as the type for a generic type argument in a separate `impl` block, which you'll see below.
+
+I also considered implementing `Currency` for `&dyn Currency`, which is possible in Rust, but that would erase the distinction between the two: it would then be possible to pass a `Money` with a dynamically-typed `Currency` to a function expecting a statically-typed `Currency`, and the actual currencies might not be the same!
+
+So our first `impl` block should be for methods that don't really care what type `C` actually is:
 
 ```rust
 /// Common functions for statically and dynamically-typed currencies.
@@ -122,6 +126,8 @@ impl<C> Money<C> {
     }
 }
 ```
+
+The `new()` and `amount()` method don't really need to know what type `C` is so we can define them once. This does have an interest drawback however: one can pass _any_ type for the `currency` argument, so one could construct a `Money<String>` or `Money<Foo>` where `Foo` is not a `Currency`. Although that's strange, it's probably fine since you can't do much with that `Money` instance without calling methods defined in the other `impl` blocks, which will establish bounds on the type of `C`. But if you find this distasteful, see the "Marker Trait for New" section below for an interesting solution.
 
 ## Statically-Typed Currencies
 
@@ -425,3 +431,63 @@ where
     }
 }
 ```
+
+## Marker Trait for New
+
+When we first saw the `Money::new()` method, I noted that it technically allows one to construct a `Money` with something that isn't actually a `Currency`. At first I tried to work around this by putting `new()` into the specific `impl` blocks like so, but this doesn't compile:
+
+```rust
+// DOES NOT COMPILE!
+impl<C> Money<C>
+where
+    C: Currency,
+{
+    pub fn new(amount: Decimal, currency: C) -> Self {
+        Self { amount, currency }
+    }
+}
+
+impl<'c> Money<&'c dyn Currency>
+{
+    pub fn new(amount: Decimal, currency: &'c dyn Currency) -> Self {
+        Self { amount, currency }
+    }
+}
+
+fn main() {
+    // COMPILE ERROR: multiple candidates
+    let m_static = Money::new(Decimal::ONE, USD);
+    let m_dynamic = Money::new(Decimal::ONE, &USD as &dyn Currency);
+}
+```
+[rust playground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=1c78db9b128cad740076d19a0cc02478)
+
+I'm not sure why the compiler can't figure out which version of `new()` to call given that the argument types are different, but it doesn't work for now.
+
+Although we can't construct a single trait bound that allows either an owned implementation of `Currency` or a reference to a dynamic one, we can define a new trait and do a blanket implementation for those two things. For example:
+
+```rust
+// New marker trait, with blanket implementations for anything that 
+// implements Currency, and any `&'c dyn Currency`
+pub trait CurrencyOrRef {}
+impl<C> CurrencyOrRef for C where C: Currency {}
+impl<'c> CurrencyOrRef for &'c dyn Currency {}
+
+// Single impl block using CurrencyOrRef as trait bound
+impl<C> Money<C>
+where
+    C: CurrencyOrRef,
+{
+    pub fn new(amount: Decimal, currency: C) -> Self {
+        Self { amount, currency }
+    }
+}
+
+fn main() {
+    // Now this compiles
+    let m_static = Money::new(Decimal::ONE, USD);
+    let m_dynamic = Money::new(Decimal::ONE, &USD as &dyn Currency);
+}
+```
+
+Now it's impossible to construct a `Money<String>` or `Money<Foo>` where `Foo` is not a `Currency`. But it's also not impossible for a caller to just implement the `CurrencyOrRef` marker trait on their own `Foo` type, so it's unclear to me if this is really worth it in the end.
