@@ -3,14 +3,15 @@ use std::ops::Add;
 use rust_decimal::Decimal;
 use thiserror::Error;
 
-/// Various Currency definitions
+/// Various Currency definitions used in tests below
+#[cfg(test)]
 pub mod currencies;
 
 /// The CurrencyMap, which provides `currency code -> &dyn Currency` lookup.
 pub mod currency_map;
 
 /// Common trait for all currencies.
-pub trait Currency: Send + Sync {
+pub trait Currency {
     /// Returns the unique alphabetic code for this currency
     /// (e.g., "USD" or "JPY").
     fn code(&self) -> &'static str;

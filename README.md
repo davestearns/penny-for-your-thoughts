@@ -26,7 +26,7 @@ The first step was to define a `Currency` trait that all currencies must impleme
 
 ```rust
 /// Common trait for all currencies.
-pub trait Currency: Send + Sync {
+pub trait Currency {
     /// Returns the unique alphabetic code for this currency
     /// (e.g., "USD" or "JPY").
     fn code(&self) -> &'static str;
@@ -41,8 +41,6 @@ pub trait Currency: Send + Sync {
     fn symbol(&self) -> &'static str;
 }
 ```
-
-Adding `Send + Sync` as super-traits made it easier to build a `const` map of currencies shared between the tests, which are executed concurrently on different threads. I think this is fine because a `Currency` should effectively be like a constant that only returns static data, so there's no internal state to synchronize.
 
 Initially I didn't include `&self` as an argument on these methods because I figured the implementations would just return static data, but this created a problem when I tried to build a reference to a dynamically-typed currency: `&dyn Currency`. To do this, Rust requires the trait to be "object safe," which means the compiler can build a v-table and do dynamic dispatch. Without a reference to `&self`, there would be no way to know which implementation of the trait method to call at runtime, so `&self` must be an argument, even if you never refer to it in your implementations.
 
@@ -184,15 +182,15 @@ There are a few subtleties to note here. First, we can't do this with a trait bo
 Second, we declare a lifetime argument `'c` for the `impl` block, and use that as the lifetime of the `Currency` references. This will make compiler enforce that the `Currency` instance lives for at least as long as the `Money` instance does, which is good because we are holding a reference to it. Thankfully, callers won't have to deal with this lifetime argument in their code, as the compiler can work it out from context. One will be able to simply do something like this:
 
 ```rust
-// CURRENCY_MAP is a HashMap<'static str, &'static dyn Currency>
+// CURRENCIES is a HashMap<'static str, &'static dyn Currency>
 // so dynamic_currency is of type `&dyn Currency`
-let dynamic_currency = CURRENCY_MAP.get("USD").unwrap();
+let dynamic_currency = CURRENCIES.get("USD").unwrap();
 
 // money is of type `Money<&dyn Currency>`
 let money = Money::new(Decimal::ONE, dynamic_currency);
 assert_eq!(money.currency().code(), "USD");
 
-let other_money = Money::new(Decimal::ONE, CURRENCY_MAP.get("JPY").unwrap());
+let other_money = Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap());
 assert_eq!(other_money.currency().code(), "JPY");
 ```
 
@@ -331,14 +329,14 @@ assert_eq!(
 );
 
 // dynamically-typed, same currency -> Ok
-let currency_usd = CURRENCY_MAP.get("USD").unwrap();
+let currency_usd = CURRENCIES.get("USD").unwrap();
 assert_eq!(
     Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_usd),
     Ok(Money::new(Decimal::TWO, currency_usd)),
 );
 
 // dynamically-typed, different currencies -> Err
-let currency_jpy = CURRENCY_MAP.get("JPY").unwrap();
+let currency_jpy = CURRENCIES.get("JPY").unwrap();
 assert_eq!(
     Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_jpy),
     Err(MoneyMathError::IncompatibleCurrencies(
@@ -543,6 +541,15 @@ where
 ```
 
 This makes the marker trait a bit more useful and perhaps worth it.
+
+## TODO
+
+I still need to finish the following:
+
+* **Subtraction, Multiplication, Division, Negation:** We should support all of these math operation in the same way we supported Add.
+* **Helper Methods:** Might be useful to add various helpers like `is_zero()` and `split()` for minor-unit aware splitting (e.g., remainder pennies gets assigned to a subset of the buckets).
+* **Currency Formatting:** There is a very simple and naive `Display` implementation, but proper locale-sensitive formatting requires a lot more sophistication.
+* **ISO 4217 Currency Definitions:** We could include a module with all the ISO 4217 currency definitions, but these do change over time, so we'd need to keep them up to date.
 
 ## Corrections or Suggestions?
 
