@@ -2,6 +2,11 @@
 name = "penny-for-your-thoughts"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Money datatype that supports both statically and dynamically typed currencies"
+repository = "https://github.com/davestearns/penny-for-your-thoughts"
+keywords = ["money", "currency"]
+categories = ["data-structures"]
 
 [dependencies]
 rust_decimal = "1.35.0"
