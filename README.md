@@ -127,7 +127,7 @@ impl<C> Money<C> {
 }
 ```
 
-The `new()` and `amount()` method don't really need to know what type `C` is so we can define them once. This does have an interest drawback however: one can pass _any_ type for the `currency` argument, so one could construct a `Money<String>` or `Money<Foo>` where `Foo` is not a `Currency`. Although that's strange, it's probably fine since you can't do much with that `Money` instance without calling methods defined in the other `impl` blocks, which will establish bounds on the type of `C`. But if you find this distasteful, see the "Marker Trait for New" section below for an interesting solution.
+The `new()` and `amount()` method don't really need to know what type `C` actually is, so we can define them once. This does have an interesting drawback, however: one can pass _any_ type for the `currency` argument, so one could construct a `Money<String>` or `Money<Foo>` where `Foo` is not a `Currency`. Although that's strange, it's probably fine since you can't do much with that `Money` instance without calling methods defined in the other `impl` blocks, which will establish bounds on the type of `C`. But if you find this distasteful, see the "Marker Trait for New" section below for an interesting solution.
 
 ## Statically-Typed Currencies
 
