@@ -232,7 +232,7 @@ where
 }
 ```
 
-For the dynamically-typed version, we define a `MoneyError` enum and a different `Output` associated type:
+For the dynamically-typed version, we define a `MoneyMathError` enum and set the `Output` associated type to be a `Result<Self, MoneyMathError>`:
 
 ```rust
 /// Errors that can occur when doing math with Money instances that
