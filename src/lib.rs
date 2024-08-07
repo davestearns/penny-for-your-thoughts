@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 use rust_decimal::Decimal;
 use thiserror::Error;
@@ -262,6 +262,86 @@ where
     }
 }
 
+/// Subtracts Money instances with statically-typed currencies.
+impl<C> Sub for Money<C>
+where
+    C: Currency,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            amount: self.amount - rhs.amount,
+            currency: self.currency,
+        }
+    }
+}
+
+/// Subtracts Money instances with dynamically-typed currencies.
+impl<'c> Sub for Money<&'c dyn Currency> {
+    type Output = Result<Self, MoneyMathError>;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        if self.currency.code() == rhs.currency.code() {
+            Ok(Self {
+                amount: self.amount - rhs.amount,
+                currency: self.currency,
+            })
+        } else {
+            Err(MoneyMathError::IncompatibleCurrencies(
+                self.currency.code(),
+                rhs.currency.code(),
+            ))
+        }
+    }
+}
+
+/// Subtracts instances of Money with statically-typed currencies
+/// from instances with dynamically-typed currencies.
+impl<'c, C> Sub<Money<C>> for Money<&'c dyn Currency>
+where
+    C: Currency,
+{
+    type Output = Result<Self, MoneyMathError>;
+
+    fn sub(self, rhs: Money<C>) -> Self::Output {
+        if self.currency.code() == rhs.currency.code() {
+            Ok(Self {
+                amount: self.amount - rhs.amount,
+                currency: self.currency,
+            })
+        } else {
+            Err(MoneyMathError::IncompatibleCurrencies(
+                self.currency.code(),
+                rhs.currency.code(),
+            ))
+        }
+    }
+}
+
+/// Subtracts instances of Money with dynamically-typed currencies
+/// from instances with statically-typed currencies.
+impl<'c, C> Sub<Money<&'c dyn Currency>> for Money<C>
+where
+    C: Currency,
+{
+    type Output = Result<Self, MoneyMathError>;
+
+    fn sub(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
+        if self.currency.code() == rhs.currency.code() {
+            Ok(Self {
+                amount: self.amount - rhs.amount,
+                currency: self.currency,
+            })
+        } else {
+            Err(MoneyMathError::IncompatibleCurrencies(
+                self.currency.code(),
+                rhs.currency.code(),
+            ))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::LazyLock;
@@ -491,6 +571,58 @@ mod tests {
                 USD.code(),
                 currency_jpy.code()
             )),
+        );
+    }
+
+    #[test]
+    fn subtract() {
+        // static
+        assert_eq!(
+            Money::new(Decimal::TWO, USD) - Money::new(Decimal::ONE, USD),
+            Money::new(Decimal::ONE, USD)
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, USD) - Money::new(Decimal::TWO, USD),
+            Money::new(Decimal::NEGATIVE_ONE, USD)
+        );
+
+        //dynamic, same currency
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        let currency_jpy = CURRENCIES.get("JPY").unwrap();
+
+        assert_eq!(
+            Money::new(Decimal::TWO, currency_usd) - Money::new(Decimal::ONE, currency_usd),
+            Ok(Money::new(Decimal::ONE, currency_usd))
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_usd) - Money::new(Decimal::TWO, currency_usd),
+            Ok(Money::new(Decimal::NEGATIVE_ONE, currency_usd))
+        );
+
+        // dynamic, different currencies
+        assert_eq!(
+            Money::new(Decimal::TWO, currency_jpy) - Money::new(Decimal::ONE, currency_usd),
+            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+        );
+
+        // mixed, same currency
+        assert_eq!(
+            Money::new(Decimal::TWO, currency_usd) - Money::new(Decimal::ONE, USD),
+            Ok(Money::new(Decimal::ONE, currency_usd))
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE, USD) - Money::new(Decimal::TWO, currency_usd),
+            Ok(Money::new(Decimal::NEGATIVE_ONE, USD))
+        );
+
+        // mixed, different currencies
+        assert_eq!(
+            Money::new(Decimal::TWO, JPY) - Money::new(Decimal::ONE, currency_usd),
+            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+        );
+        assert_eq!(
+            Money::new(Decimal::TWO, currency_jpy) - Money::new(Decimal::ONE, USD),
+            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
         );
     }
 }
