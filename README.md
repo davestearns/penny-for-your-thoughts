@@ -491,3 +491,59 @@ fn main() {
 ```
 
 Now it's impossible to construct a `Money<String>` or `Money<Foo>` where `Foo` is not a `Currency`. But it's also not impossible for a caller to just implement the `CurrencyOrRef` marker trait on their own `Foo` type, so it's unclear to me if this is really worth it in the end.
+
+But this technique does make it easier to support other kinds of constructors that might need a subset of the `Currency` trait. For example, say we wanted to support creating a `Money` from some amount of currency minor units. To do that, we need to know how many minor units the currency supports, which is a method on the `Currency` trait. We could do that by making the marker trait here a bit smarter:
+
+```rust
+/// Used as a trait bound when constructing new instances of Money
+/// from minor units.
+pub trait MinorUnits {
+    fn minor_units(&self) -> u32;
+}
+
+/// Blanket implementation for any static [Currency] instance.
+impl<C> MinorUnits for C
+where
+    C: Currency,
+{
+    fn minor_units(&self) -> u32 {
+        self.minor_units()
+    }
+}
+
+/// Implementation for an `&dyn Currency`.
+impl<'c> MinorUnits for &'c dyn Currency {
+    fn minor_units(&self) -> u32 {
+        (*self).minor_units()
+    }
+}
+
+/// Methods that require knowing the `minor_units` of the currency.
+impl<C> Money<C>
+where
+    C: MinorUnits,
+{
+    /// Construct a Money from a decimal amount and currency.
+    /// (This doesn't strictly need the minor units but we include
+    /// it here to take advantage of the marker trait).
+    pub fn new(amount: Decimal, currency: C) -> Self {
+        Self { amount, currency }
+    }
+
+    /// Constructs a Money from some number of minor units in the
+    /// specified Currency. For example, 100 USD minor units is one USD,
+    /// but 100 JPY minor units is 100 JPY.
+    pub fn from_minor_units(minor_units: i64, currency: C) -> Self {
+        Self {
+            amount: Decimal::new(minor_units, currency.minor_units()),
+            currency,
+        }
+    }
+}
+```
+
+This makes the marker trait a bit more useful and perhaps worth it.
+
+## Corrections or Suggestions?
+
+Is there a better way to do this? I'm fairly new to Rust, so perhaps there's a mechanism I haven't run across yet that would provide a better solution. If you know of something, please open an issue and tell me about it! I'll update the code and README accordingly.

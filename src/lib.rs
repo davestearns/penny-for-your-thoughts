@@ -89,7 +89,7 @@ impl<C> Money<C> {
     }
 }
 
-/// Method that require knowing the `minor_units` of the currency.
+/// Methods that require knowing the `minor_units` of the currency.
 impl<C> Money<C>
 where
     C: MinorUnits,
