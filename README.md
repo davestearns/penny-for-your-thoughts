@@ -126,9 +126,9 @@ We define a generic type argument `C` for the currency, but notice that I don't 
 
 At first I tried to construct a single impl block with a trait bound that allowed either an owned `Currency` implementation OR a reference to a dynamic `Currency`, but that doesn't actually make sense, as an `&dyn Currency` is actually a _type_ not a _trait_, so it can't be used as a trait bound. But it can be used as the type for a generic type argument in a separate `impl` block, which you'll see below.
 
-I also considered implementing `Currency` for `&dyn Currency`, which is possible in Rust, but that would erase the distinction between the two: it would then be possible to pass a `Money` with a dynamically-typed `Currency` to a function expecting a statically-typed `Currency`, and the actual currencies might not be the same!
+I also considered implementing `Currency` for `&dyn Currency`, which is possible in Rust, but that would erase the distinction between the two: it would then be possible to use a `Money<&dyn Currency>` in an `impl` block with a trait bound of `C: Currency` and the code couldn't really tell the difference between a statically and dynamically-typed `Currency`.
 
-So our first `impl` block should be for methods that don't really care what type `C` actually is:
+So I started with an `impl` block with no trait bounds, containing methods that don't really care what the type of `C` actually is:
 
 ```rust
 /// Common functions for statically and dynamically-typed currencies.
