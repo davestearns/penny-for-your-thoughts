@@ -54,7 +54,7 @@ pub trait MinorUnits {
     fn minor_units(&self) -> u32;
 }
 
-/// Blanket implementation for any static [Currency] instance.
+/// Blanket implementation of [MinorUnits] for any static [Currency] instance.
 impl<C> MinorUnits for C
 where
     C: Currency,
@@ -64,7 +64,7 @@ where
     }
 }
 
-/// Implementation for an `&dyn Currency`.
+/// Blanket implementation of [MinorUnits] for an `&dyn Currency`.
 impl<'c> MinorUnits for &'c dyn Currency {
     fn minor_units(&self) -> u32 {
         (*self).minor_units()
@@ -72,6 +72,10 @@ impl<'c> MinorUnits for &'c dyn Currency {
 }
 
 /// An amount of money in a particular currency.
+///
+/// Money instances are immutable. All operations that would
+/// alter the state return a new instance with that new state,
+/// leaving the original instance the same.
 #[derive(Debug, Clone)]
 pub struct Money<C> {
     amount: Decimal,
