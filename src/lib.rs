@@ -1,7 +1,10 @@
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
-use rust_decimal::Decimal;
+use rust_decimal::{Decimal, MathematicalOps};
 use thiserror::Error;
+
+/// Strategies for use with the [Money::round] method.
+pub use rust_decimal::RoundingStrategy;
 
 pub mod currency_map;
 pub mod iso_currencies;
@@ -76,7 +79,10 @@ pub struct Money<C> {
 }
 
 /// Common functions for statically and dynamically-typed currencies.
-impl<C> Money<C> {
+impl<C> Money<C>
+where
+    C: Copy,
+{
     /// Constructs a new Money given a decimal amount and Currency.
     /// The currency argument can be either an owned statically-typed
     /// Currency instance, or a dynamically-typed reference
@@ -93,6 +99,33 @@ impl<C> Money<C> {
     /// Returns true if the amount is zero.
     pub fn is_zero(&self) -> bool {
         self.amount.is_zero()
+    }
+
+    /// Returns true if the amount is positive.
+    pub fn is_positive(&self) -> bool {
+        self.amount.is_sign_positive()
+    }
+
+    /// Returns true if the amount is negative.
+    pub fn is_negative(&self) -> bool {
+        self.amount.is_sign_negative()
+    }
+
+    /// Returns a new instance raised to the specified power.
+    pub fn pow(&self, exponent: i64) -> Self {
+        Self {
+            amount: self.amount.powi(exponent),
+            currency: self.currency,
+        }
+    }
+
+    /// Returns a new instance rounded to the specified number
+    /// of decimal places, using the specified strategy.
+    pub fn round(&self, decimal_places: u32, strategy: RoundingStrategy) -> Self {
+        Self {
+            amount: self.amount.round_dp_with_strategy(decimal_places, strategy),
+            currency: self.currency,
+        }
     }
 }
 
@@ -1058,6 +1091,45 @@ mod tests {
         assert_eq!(
             -Money::new(Decimal::ONE, currency_usd),
             Money::new(Decimal::NEGATIVE_ONE, currency_usd)
+        );
+    }
+
+    #[test]
+    fn pow() {
+        assert_eq!(
+            Money::new(Decimal::TEN, USD).pow(2),
+            Money::new(Decimal::ONE_HUNDRED, USD)
+        );
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        assert_eq!(
+            Money::new(Decimal::TEN, currency_usd).pow(2),
+            Money::new(Decimal::ONE_HUNDRED, currency_usd)
+        );
+    }
+
+    #[test]
+    fn is_positive_negative() {
+        assert!(Money::new(Decimal::ONE, USD).is_positive());
+        assert!((-Money::new(Decimal::ONE, USD)).is_negative());
+
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        assert!(Money::new(Decimal::ONE, currency_usd).is_positive());
+        assert!((-Money::new(Decimal::ONE, currency_usd)).is_negative());
+
+        // Decimal zero is considered positive, but not negative.
+        assert!(Money::new(Decimal::ZERO, USD).is_positive());
+        assert!(!Money::new(Decimal::ZERO, USD).is_negative());
+    }
+
+    #[test]
+    fn round() {
+        assert_eq!(
+            Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointNearestEven),
+            Money::new(Decimal::TWO, USD)
+        );
+        assert_eq!(
+            Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointTowardZero),
+            Money::new(Decimal::ONE, USD)
         );
     }
 }
