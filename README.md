@@ -27,7 +27,7 @@ The first step was to define a `Currency` trait that all currencies must impleme
 ```rust
 /// Common trait for all currencies.
 pub trait Currency {
-    /// Returns the unique alphabetic code for this currency
+    /// Returns the unique ISO alphabetic code for this currency
     /// (e.g., "USD" or "JPY").
     fn code(&self) -> &'static str;
     /// Returns the number of minor units supported by the currency.
@@ -37,8 +37,13 @@ pub trait Currency {
     /// Returns the symbol used to represent this currency.
     /// For example `$` for USD or `¥` for JPY. Some currencies
     /// use a series of letters instead of a special symbol
-    /// (e.g., `CHF` or `Lek`).
+    /// (e.g., `CHF` or `Lek`). If the currency has no defined
+    /// symbol, this will return an empty string.
     fn symbol(&self) -> &'static str;
+    /// Returns the informal name for this currency.
+    fn name(&self) -> &'static str;
+    /// Returns the unique ISO numeric code for this currency.
+    fn numeric_code(&self) -> u32;
 }
 ```
 
@@ -49,6 +54,7 @@ For instances of `Currency` my first inclination was to declare an `enum` with t
 Instead, we need each `Currency` implementation to be it's own _type_. The easiest way to do that is to declare them as separate `struct`s, each of which `impl Currency`:
 
 ```rust
+/// US Dollar
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct USD;
 impl Currency for USD {
@@ -56,15 +62,24 @@ impl Currency for USD {
         "USD"
     }
 
+    fn symbol(&self) -> &'static str {
+        "$"
+    }
+
+    fn name(&self) -> &'static str {
+        "US Dollar"
+    }
+
     fn minor_units(&self) -> u32 {
         2
     }
 
-    fn symbol(&self) -> &'static str {
-        "$"
+    fn numeric_code(&self) -> u32 {
+        840
     }
 }
 
+/// Yen
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct JPY;
 impl Currency for JPY {
@@ -72,12 +87,20 @@ impl Currency for JPY {
         "JPY"
     }
 
+    fn symbol(&self) -> &'static str {
+        "¥"
+    }
+
+    fn name(&self) -> &'static str {
+        "Yen"
+    }
+
     fn minor_units(&self) -> u32 {
         0
     }
 
-    fn symbol(&self) -> &'static str {
-        "¥"
+    fn numeric_code(&self) -> u32 {
+        392
     }
 }
 ```
