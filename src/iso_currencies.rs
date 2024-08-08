@@ -1,5 +1,6 @@
 //! ISO 4217 Currency definitions, published on 2024-06-25
-//! source: https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml
+//!
+//! source: <https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml>
 
 use crate::Currency;
 

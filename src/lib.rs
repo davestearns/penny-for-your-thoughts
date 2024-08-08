@@ -3,11 +3,8 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use rust_decimal::Decimal;
 use thiserror::Error;
 
-/// ISO 4217 currencies.
-pub mod iso_currencies;
-
-/// The CurrencyMap, which provides `currency code -> &dyn Currency` lookup.
 pub mod currency_map;
+pub mod iso_currencies;
 
 /// Common trait for all currencies.
 pub trait Currency {

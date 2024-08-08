@@ -1,3 +1,4 @@
+//! CurrencyMap providing simplified currency code to `&dyn Currency` lookup.
 use std::collections::HashMap;
 
 use crate::Currency;
