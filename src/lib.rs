@@ -3,16 +3,15 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use rust_decimal::Decimal;
 use thiserror::Error;
 
-/// Various Currency definitions used in tests below
-#[cfg(test)]
-pub mod currencies;
+/// ISO 4217 currencies.
+pub mod iso_currencies;
 
 /// The CurrencyMap, which provides `currency code -> &dyn Currency` lookup.
 pub mod currency_map;
 
 /// Common trait for all currencies.
 pub trait Currency {
-    /// Returns the unique alphabetic code for this currency
+    /// Returns the unique ISO alphabetic code for this currency
     /// (e.g., "USD" or "JPY").
     fn code(&self) -> &'static str;
     /// Returns the number of minor units supported by the currency.
@@ -22,8 +21,13 @@ pub trait Currency {
     /// Returns the symbol used to represent this currency.
     /// For example `$` for USD or `¥` for JPY. Some currencies
     /// use a series of letters instead of a special symbol
-    /// (e.g., `CHF` or `Lek`).
+    /// (e.g., `CHF` or `Lek`). If the currency has no defined
+    /// symbol, this will return an empty string.
     fn symbol(&self) -> &'static str;
+    /// Returns the informal name for this currency.
+    fn name(&self) -> &'static str;
+    /// Returns the unique ISO numeric code for this currency.
+    fn numeric_code(&self) -> u32;
 }
 
 /// Debug output for a dynamically-typed Currency.
@@ -539,7 +543,7 @@ mod tests {
     use std::sync::LazyLock;
 
     use super::*;
-    use crate::currencies::*;
+    use crate::iso_currencies::{JPY, USD};
     use currency_map::CurrencyMap;
     use rust_decimal::Decimal;
 

@@ -546,8 +546,7 @@ This makes the marker trait a bit more useful and perhaps worth it.
 
 I still need to finish the following:
 
-* **Currency Formatting:** There is a very simple and naive `Display` implementation, but proper locale-sensitive formatting requires a lot more sophistication.
-* **ISO 4217 Currency Definitions:** We could include a module with all the ISO 4217 currency definitions, but these do change over time, so we'd need to keep them up to date.
+* **Currency Formatting:** Proper locale-sensitive money formatting is _very_ complicated, but this is something I'd like to add.
 * **Helper Methods:** Might be useful to add various helpers `split()` for minor-unit aware splitting (e.g., remainder pennies gets assigned to a subset of the buckets).
 
 ## Corrections or Suggestions?
