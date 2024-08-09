@@ -1,4 +1,7 @@
-use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Neg, Rem, Sub},
+};
 
 use rust_decimal::{Decimal, MathematicalOps};
 use thiserror::Error;
@@ -374,6 +377,21 @@ impl<'c> PartialOrd for Money<&'c dyn Currency> {
         } else {
             None
         }
+    }
+}
+
+impl<C> Display for Money<C>
+where
+    C: Currency,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.amount, self.currency.code())
+    }
+}
+
+impl<'c> Display for Money<&'c dyn Currency> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.amount, self.currency.code())
     }
 }
 
@@ -878,5 +896,17 @@ mod tests {
         // different currencies -> neither greater than nor less than
         assert!(!(Money::new(Decimal::ONE, currency_usd) < Money::new(Decimal::TWO, currency_jpy)));
         assert!(!(Money::new(Decimal::TWO, currency_usd) > Money::new(Decimal::ONE, currency_jpy)));
+    }
+
+    #[test]
+    fn to_string() {
+        assert_eq!(
+            Money::new(Decimal::ONE_THOUSAND, USD).to_string(),
+            "1000 USD"
+        );
+        assert_eq!(
+            Money::new(Decimal::ONE_THOUSAND, &USD as &dyn Currency).to_string(),
+            "1000 USD"
+        );
     }
 }
