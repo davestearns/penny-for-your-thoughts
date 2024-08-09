@@ -72,7 +72,14 @@ impl Formatter {
         // Right-pad the fractional digits with zeros if necessary
         let frac = format!("{:0<1$}", maybe_frac.unwrap_or_default(), dp as usize);
 
-        format!("{}{}{}", &formatted_whole, self.decimal_separator, frac,)
+        // Only include the decimal separator if dp > 0
+        let decimal_sep = if dp > 0 {
+            self.decimal_separator
+        } else {
+            ""
+        };
+
+        format!("{}{}{}", &formatted_whole, decimal_sep, frac,)
     }
 }
 
