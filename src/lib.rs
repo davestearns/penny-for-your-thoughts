@@ -75,8 +75,13 @@ impl<'c> MinorUnits for &'c dyn Currency {
 ///
 /// Money instances are immutable. All operations that would
 /// alter the state return a new instance with that new state,
-/// leaving the original instance the same.
-#[derive(Debug, Clone)]
+/// leaving the original instance unaltered.
+///
+/// Money instances also support Copy semantics. The amount
+/// Decimal is 128 bits, but statically-typed Currency implementations
+/// are typically unit structs, so they don't add any more. References
+/// to a dynamic currency add the size of a pointer.
+#[derive(Debug, Clone, Copy)]
 pub struct Money<C> {
     amount: Decimal,
     currency: C,
@@ -169,18 +174,20 @@ impl<'c> Money<&'c dyn Currency> {
 }
 
 /// Allows equality comparisons between Money instances with statically-typed
-/// currencies.
+/// currencies. The compiler will already ensure that `C` is the same for
+/// both instances, so only the amounts must match.
 impl<C> PartialEq for Money<C>
 where
     C: Currency + PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.amount == other.amount && self.currency == other.currency
+        self.amount == other.amount
     }
 }
 
 /// Allows equality comparisons between Money instances with dynamically-typed
-/// currencies and those with statically-typed currencies
+/// currencies and those with statically-typed currencies. Both the amounts
+/// and the currency codes must match.
 impl<'c, C> PartialEq<Money<&'c dyn Currency>> for Money<C>
 where
     C: Currency + PartialEq,
@@ -191,15 +198,16 @@ where
 }
 
 /// Allows equality comparisons between Money instances with dynamically-typed
-/// currencies.
+/// currencies. Both the amounts and currency codes must match.
 impl<'c> PartialEq for Money<&'c dyn Currency> {
     fn eq(&self, other: &Self) -> bool {
-        self.amount == other.amount && self.currency == other.currency
+        self.amount == other.amount && self.currency.code() == other.currency.code()
     }
 }
 
 /// Allows equality comparisons between Money instances with dynamically-typed
-/// currencies and those with statically-typed currencies
+/// currencies and those with statically-typed currencies. Both the amounts
+/// and currency codes must match.
 impl<'c, C> PartialEq<Money<C>> for Money<&'c dyn Currency>
 where
     C: Currency,

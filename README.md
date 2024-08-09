@@ -400,7 +400,7 @@ assert_eq!(
 );
 ```
 
-The same approach is used to support `Sub`, `Mul` and `Div` as well.
+In the actual code, there are macros defined for binary and unary ops, which makes it trivial for `Money` to also support subtraction, multiplication, division, remainder and negation as well using the same techniques.
 
 ## Equality Comparisons
 
@@ -408,7 +408,8 @@ The asserts above rely on the ability to compare `Money` instances for equality,
 
 ```rust
 /// Allows equality comparisons between Money instances with statically-typed
-/// currencies. Both the amount and currency must be the same.
+/// currencies. The compiler will already ensure that `C` is the same for
+/// both instances, so only the amounts must match.
 impl<C> PartialEq for Money<C>
 where
     C: Currency + PartialEq,
