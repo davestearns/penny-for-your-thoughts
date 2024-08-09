@@ -30,15 +30,15 @@ impl Default for Formatter {
 impl Formatter {
     pub fn format_amount(&self, amount: Decimal, default_decimal_places: u32) -> String {
         // round to the desired number of decimal places
-        let rounded_amount = amount.round_dp_with_strategy(
-            self.decimal_places.unwrap_or(default_decimal_places),
-            self.rounding_strategy,
-        );
+        let dp = self.decimal_places.unwrap_or(default_decimal_places);
+        let rounded_amount = amount.round_dp_with_strategy(dp, self.rounding_strategy);
         let amount_string = rounded_amount.to_string();
 
         // Trim off any leading negative sign and spaces, and split on `.`
         // since that seems to be the decimal separator always regardless of
-        // system locale.
+        // system locale. This also seems to be a explicit design choice in
+        // the default Rust numeric formatting as well. See
+        // https://doc.rust-lang.org/std/fmt/index.html#localization
         let mut split = amount_string
             .trim_start_matches('-')
             .trim_start()
@@ -69,19 +69,10 @@ impl Formatter {
         groups.reverse();
         let formatted_whole = groups.join(self.digit_group_separator);
 
-        // Include the decimal separator only if there are fractional digits.
-        let decimal_sep = if maybe_frac.is_some() {
-            self.decimal_separator
-        } else {
-            ""
-        };
+        // Right-pad the fractional digits with zeros if necessary
+        let frac = format!("{:0<1$}", maybe_frac.unwrap_or_default(), dp as usize);
 
-        format!(
-            "{}{}{}",
-            &formatted_whole,
-            decimal_sep,
-            maybe_frac.unwrap_or_default()
-        )
+        format!("{}{}{}", &formatted_whole, self.decimal_separator, frac,)
     }
 }
 
@@ -101,7 +92,23 @@ mod tests {
     fn format_amount_no_frac() {
         assert_eq!(
             Formatter::default().format_amount(Decimal::new(123456789123456789, 0), 2),
-            "123,456,789,123,456,789".to_string()
+            "123,456,789,123,456,789.00".to_string()
+        );
+    }
+
+    #[test]
+    fn format_amount_zero() {
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::ZERO, 2),
+            "0.00".to_string()
+        );
+    }
+
+    #[test]
+    fn format_amount_decimal_padding() {
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::new(12, 1), 4),
+            "1.2000".to_string()
         );
     }
 
