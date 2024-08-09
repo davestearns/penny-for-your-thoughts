@@ -97,6 +97,14 @@ mod tests {
     }
 
     #[test]
+    fn format_amount_no_frac_no_dp() {
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::new(123456789123456789, 0), 0),
+            "123,456,789,123,456,789".to_string()
+        );
+    }
+
+    #[test]
     fn format_amount_zero() {
         assert_eq!(
             Formatter::default().format_amount(Decimal::ZERO, 2),
