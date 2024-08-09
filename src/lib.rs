@@ -209,23 +209,6 @@ where
     }
 }
 
-/// Adds two Money instances with the same statically-typed currency.
-/// Attempting to add two instances with _different_ statically-typed
-/// Currencies simply won't compile.
-impl<C> Add for Money<C>
-where
-    C: Currency,
-{
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Self {
-            amount: self.amount + rhs.amount,
-            currency: self.currency,
-        }
-    }
-}
-
 /// Errors that can occur when doing math with Money instances that
 /// have dynamically-typed currencies
 #[derive(Debug, Error, PartialEq, Clone)]
@@ -234,427 +217,134 @@ pub enum MoneyMathError {
     IncompatibleCurrencies(&'static str, &'static str),
 }
 
-/// Adds two Money instances with dynamically-typed currencies.
-/// The Output is a Result instead of a Money since the operation
-/// can fail if the currencies are incompatible.
-impl<'c> Add for Money<&'c dyn Currency> {
-    type Output = Result<Self, MoneyMathError>;
+macro_rules! impl_binary_op {
+    ($trait:ident, $method:ident) => {
+        /// Supports $trait for Money instances with the same statically-typed currency.
+        impl<C> $trait for Money<C>
+        where
+            C: Currency,
+        {
+            type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount + rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
+            fn $method(self, rhs: Self) -> Self::Output {
+                Self {
+                    amount: self.amount.$method(rhs.amount),
+                    currency: self.currency,
+                }
+            }
         }
-    }
+
+        /// Supports $trait for two Money instances with dynamically-typed currencies.
+        /// The Output is a Result instead of a Money since the operation
+        /// can fail if the currencies are incompatible.
+        impl<'c> $trait for Money<&'c dyn Currency> {
+            type Output = Result<Self, MoneyMathError>;
+
+            fn $method(self, rhs: Self) -> Self::Output {
+                if self.currency.code() == rhs.currency.code() {
+                    Ok(Self {
+                        amount: self.amount.$method(rhs.amount),
+                        currency: self.currency,
+                    })
+                } else {
+                    Err(MoneyMathError::IncompatibleCurrencies(
+                        self.currency.code(),
+                        rhs.currency.code(),
+                    ))
+                }
+            }
+        }
+
+        /// Support $trait for a Money instance with a dynamically-typed Currency
+        /// and a Money instance with a statically-typed Currency. The Output
+        /// is a Result since the operation can fail if the currencies are
+        /// incompatible.
+        impl<'c, C> $trait<Money<C>> for Money<&'c dyn Currency>
+        where
+            C: Currency,
+        {
+            type Output = Result<Self, MoneyMathError>;
+
+            fn $method(self, rhs: Money<C>) -> Self::Output {
+                if self.currency.code() == rhs.currency.code() {
+                    Ok(Self {
+                        amount: self.amount.$method(rhs.amount),
+                        currency: self.currency,
+                    })
+                } else {
+                    Err(MoneyMathError::IncompatibleCurrencies(
+                        self.currency.code(),
+                        rhs.currency.code(),
+                    ))
+                }
+            }
+        }
+
+        /// Supports $trait for a Money instance with a statically-typed Currency
+        /// and a Money instance with a dynamically-typed Currency. The output
+        /// is a Result since the operation can fail if the currencies are
+        /// incompatible.
+        impl<'c, C> $trait<Money<&'c dyn Currency>> for Money<C>
+        where
+            C: Currency,
+        {
+            type Output = Result<Self, MoneyMathError>;
+
+            fn $method(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
+                if self.currency.code() == rhs.currency.code() {
+                    Ok(Self {
+                        amount: self.amount.$method(rhs.amount),
+                        currency: self.currency,
+                    })
+                } else {
+                    Err(MoneyMathError::IncompatibleCurrencies(
+                        self.currency.code(),
+                        rhs.currency.code(),
+                    ))
+                }
+            }
+        }
+    };
 }
 
-/// Adds a Money instance with a dynamically-typed Currency to
-/// a Money instance with a statically-typed Currency. The Output
-/// is a Result since the operation can fail if the currencies are
-/// incompatible.
-impl<'c, C> Add<Money<C>> for Money<&'c dyn Currency>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
+impl_binary_op!(Add, add);
+impl_binary_op!(Sub, sub);
+impl_binary_op!(Mul, mul);
+impl_binary_op!(Div, div);
+impl_binary_op!(Rem, rem);
 
-    fn add(self, rhs: Money<C>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount + rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
+macro_rules! impl_unary_op {
+    ($trait:ident, $method:ident) => {
+        /// Supports $trait for Money instances with statically-typed currencies.
+        impl<C> $trait for Money<C>
+        where
+            C: Currency,
+        {
+            type Output = Self;
+
+            fn $method(self) -> Self::Output {
+                Self {
+                    amount: self.amount.$method(),
+                    currency: self.currency,
+                }
+            }
         }
-    }
+
+        /// Supports $trait for Money instances with dynamically-typed currencies.
+        impl<'c> $trait for Money<&'c dyn Currency> {
+            type Output = Self;
+
+            fn $method(self) -> Self::Output {
+                Self {
+                    amount: self.amount.$method(),
+                    currency: self.currency,
+                }
+            }
+        }
+    };
 }
 
-/// Adds a Money instance with a statically-typed Currency to
-/// a Money instance with a dynamically-typed Currency. The output
-/// is a Result since the operation can fail if the currencies are
-/// incompatible.
-impl<'c, C> Add<Money<&'c dyn Currency>> for Money<C>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn add(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount + rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Subtracts Money instances with the same statically-typed currency.
-impl<C> Sub for Money<C>
-where
-    C: Currency,
-{
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self {
-            amount: self.amount - rhs.amount,
-            currency: self.currency,
-        }
-    }
-}
-
-/// Subtracts Money instances with dynamically-typed currencies.
-impl<'c> Sub for Money<&'c dyn Currency> {
-    type Output = Result<Self, MoneyMathError>;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount - rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Subtracts instances of Money with statically-typed currencies
-/// from instances with dynamically-typed currencies.
-impl<'c, C> Sub<Money<C>> for Money<&'c dyn Currency>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn sub(self, rhs: Money<C>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount - rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Subtracts instances of Money with dynamically-typed currencies
-/// from instances with statically-typed currencies.
-impl<'c, C> Sub<Money<&'c dyn Currency>> for Money<C>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn sub(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount - rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Multiplies instances of Money with the same statically-typed currency.
-impl<C> Mul for Money<C>
-where
-    C: Currency,
-{
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        Self {
-            amount: self.amount * rhs.amount,
-            currency: self.currency,
-        }
-    }
-}
-
-/// Multiplies instances of Money with dynamically-typed currencies.
-impl<'c> Mul for Money<&'c dyn Currency> {
-    type Output = Result<Self, MoneyMathError>;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount * rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Multiplies instances of Money with dynamically and
-/// statically-typed currencies.
-impl<'c, C> Mul<Money<C>> for Money<&'c dyn Currency>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn mul(self, rhs: Money<C>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount * rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Multiplies instances of Money with dynamically and
-/// statically-typed currencies.
-impl<'c, C> Mul<Money<&'c dyn Currency>> for Money<C>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn mul(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount * rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Divides instances of Money with the same statically-typed currency.
-impl<C> Div for Money<C>
-where
-    C: Currency,
-{
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        Self {
-            amount: self.amount / rhs.amount,
-            currency: self.currency,
-        }
-    }
-}
-
-/// Divides instances of Money with dynamically-typed currencies.
-impl<'c> Div for Money<&'c dyn Currency> {
-    type Output = Result<Self, MoneyMathError>;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount / rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Divides instances of Money with dynamically and statically-typed
-/// currencies.
-impl<'c, C> Div<Money<C>> for Money<&'c dyn Currency>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn div(self, rhs: Money<C>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount / rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Divides instances of Money with dynamically and statically-typed
-/// currencies.
-impl<'c, C> Div<Money<&'c dyn Currency>> for Money<C>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn div(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount / rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Calculates the modulo remainder of dividing Money instances with
-/// the same statically-typed currency.
-impl<C> Rem for Money<C>
-where
-    C: Currency,
-{
-    type Output = Self;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        Self {
-            amount: self.amount % rhs.amount,
-            currency: self.currency,
-        }
-    }
-}
-
-/// Calculates the modulo remainder of dividing instances with
-/// dynamically-typed currencies.
-impl<'c> Rem for Money<&'c dyn Currency> {
-    type Output = Result<Self, MoneyMathError>;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount % rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Calculates the modulo remainder of dividing a instance
-/// with a dynamically-typed currency and an instances with
-/// a statically-typed currency.
-impl<'c, C> Rem<Money<C>> for Money<&'c dyn Currency>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn rem(self, rhs: Money<C>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount % rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Calculates the modulo remainder of dividing a instance
-/// with a statically-typed currency and an instances with
-/// a dynamically-typed currency.
-impl<'c, C> Rem<Money<&'c dyn Currency>> for Money<C>
-where
-    C: Currency,
-{
-    type Output = Result<Self, MoneyMathError>;
-
-    fn rem(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
-        if self.currency.code() == rhs.currency.code() {
-            Ok(Self {
-                amount: self.amount % rhs.amount,
-                currency: self.currency,
-            })
-        } else {
-            Err(MoneyMathError::IncompatibleCurrencies(
-                self.currency.code(),
-                rhs.currency.code(),
-            ))
-        }
-    }
-}
-
-/// Negates Money instances with statically-typed currencies.
-impl<C> Neg for Money<C>
-where
-    C: Currency,
-{
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Self {
-            amount: -self.amount,
-            currency: self.currency,
-        }
-    }
-}
-
-/// Negates Money instances with dynamically-typed currencies.
-impl<'c> Neg for Money<&'c dyn Currency> {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Self {
-            amount: -self.amount,
-            currency: self.currency,
-        }
-    }
-}
+impl_unary_op!(Neg, neg);
 
 /// Allows ordering comparisons for Money instances with the same
 /// statically-typed currency.
