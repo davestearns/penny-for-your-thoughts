@@ -57,7 +57,7 @@ impl Formatter {
             if group_len >= group_start {
                 break;
             }
-            groups.push(&whole[group_start - group_len..group_start]);
+            groups.push(&whole[(group_start - group_len)..group_start]);
             group_start -= group_len;
         }
         if group_start > 0 {
@@ -73,13 +73,9 @@ impl Formatter {
         let frac = format!("{:0<1$}", maybe_frac.unwrap_or_default(), dp as usize);
 
         // Only include the decimal separator if dp > 0
-        let decimal_sep = if dp > 0 {
-            self.decimal_separator
-        } else {
-            ""
-        };
+        let decimal_sep = if dp > 0 { self.decimal_separator } else { "" };
 
-        format!("{}{}{}", &formatted_whole, decimal_sep, frac,)
+        format!("{}{}{}", &formatted_whole, decimal_sep, frac)
     }
 }
 
