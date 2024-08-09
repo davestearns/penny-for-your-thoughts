@@ -11,6 +11,7 @@ pub use rust_decimal::RoundingStrategy;
 
 pub mod currency_map;
 pub mod iso_currencies;
+pub mod formatter;
 
 /// Common trait for all currencies.
 pub trait Currency {
