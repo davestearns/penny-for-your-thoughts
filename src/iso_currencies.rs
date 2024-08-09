@@ -5,7 +5,7 @@
 use crate::Currency;
 
 /// Afghani
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AFN;
 impl Currency for AFN {
     fn code(&self) -> &'static str {
@@ -30,7 +30,7 @@ impl Currency for AFN {
 }
 
 /// Euro
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct EUR;
 impl Currency for EUR {
     fn code(&self) -> &'static str {
@@ -55,7 +55,7 @@ impl Currency for EUR {
 }
 
 /// Lek
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ALL;
 impl Currency for ALL {
     fn code(&self) -> &'static str {
@@ -80,7 +80,7 @@ impl Currency for ALL {
 }
 
 /// Algerian Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct DZD;
 impl Currency for DZD {
     fn code(&self) -> &'static str {
@@ -105,7 +105,7 @@ impl Currency for DZD {
 }
 
 /// US Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct USD;
 impl Currency for USD {
     fn code(&self) -> &'static str {
@@ -130,7 +130,7 @@ impl Currency for USD {
 }
 
 /// Kwanza
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AOA;
 impl Currency for AOA {
     fn code(&self) -> &'static str {
@@ -155,7 +155,7 @@ impl Currency for AOA {
 }
 
 /// East Caribbean Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XCD;
 impl Currency for XCD {
     fn code(&self) -> &'static str {
@@ -180,7 +180,7 @@ impl Currency for XCD {
 }
 
 /// Argentine Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ARS;
 impl Currency for ARS {
     fn code(&self) -> &'static str {
@@ -205,7 +205,7 @@ impl Currency for ARS {
 }
 
 /// Armenian Dram
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AMD;
 impl Currency for AMD {
     fn code(&self) -> &'static str {
@@ -230,7 +230,7 @@ impl Currency for AMD {
 }
 
 /// Aruban Florin
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AWG;
 impl Currency for AWG {
     fn code(&self) -> &'static str {
@@ -255,7 +255,7 @@ impl Currency for AWG {
 }
 
 /// Australian Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AUD;
 impl Currency for AUD {
     fn code(&self) -> &'static str {
@@ -280,7 +280,7 @@ impl Currency for AUD {
 }
 
 /// Azerbaijan Manat
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AZN;
 impl Currency for AZN {
     fn code(&self) -> &'static str {
@@ -305,7 +305,7 @@ impl Currency for AZN {
 }
 
 /// Bahamian Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BSD;
 impl Currency for BSD {
     fn code(&self) -> &'static str {
@@ -330,7 +330,7 @@ impl Currency for BSD {
 }
 
 /// Bahraini Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BHD;
 impl Currency for BHD {
     fn code(&self) -> &'static str {
@@ -355,7 +355,7 @@ impl Currency for BHD {
 }
 
 /// Taka
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BDT;
 impl Currency for BDT {
     fn code(&self) -> &'static str {
@@ -380,7 +380,7 @@ impl Currency for BDT {
 }
 
 /// Barbados Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BBD;
 impl Currency for BBD {
     fn code(&self) -> &'static str {
@@ -405,7 +405,7 @@ impl Currency for BBD {
 }
 
 /// Belarusian Ruble
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BYN;
 impl Currency for BYN {
     fn code(&self) -> &'static str {
@@ -430,7 +430,7 @@ impl Currency for BYN {
 }
 
 /// Belize Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BZD;
 impl Currency for BZD {
     fn code(&self) -> &'static str {
@@ -455,7 +455,7 @@ impl Currency for BZD {
 }
 
 /// CFA Franc BCEAO
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XOF;
 impl Currency for XOF {
     fn code(&self) -> &'static str {
@@ -480,7 +480,7 @@ impl Currency for XOF {
 }
 
 /// Bermudian Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BMD;
 impl Currency for BMD {
     fn code(&self) -> &'static str {
@@ -505,7 +505,7 @@ impl Currency for BMD {
 }
 
 /// Indian Rupee
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct INR;
 impl Currency for INR {
     fn code(&self) -> &'static str {
@@ -530,7 +530,7 @@ impl Currency for INR {
 }
 
 /// Ngultrum
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BTN;
 impl Currency for BTN {
     fn code(&self) -> &'static str {
@@ -555,7 +555,7 @@ impl Currency for BTN {
 }
 
 /// Boliviano
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BOB;
 impl Currency for BOB {
     fn code(&self) -> &'static str {
@@ -580,7 +580,7 @@ impl Currency for BOB {
 }
 
 /// Mvdol
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BOV;
 impl Currency for BOV {
     fn code(&self) -> &'static str {
@@ -605,7 +605,7 @@ impl Currency for BOV {
 }
 
 /// Convertible Mark
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BAM;
 impl Currency for BAM {
     fn code(&self) -> &'static str {
@@ -630,7 +630,7 @@ impl Currency for BAM {
 }
 
 /// Pula
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BWP;
 impl Currency for BWP {
     fn code(&self) -> &'static str {
@@ -655,7 +655,7 @@ impl Currency for BWP {
 }
 
 /// Norwegian Krone
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct NOK;
 impl Currency for NOK {
     fn code(&self) -> &'static str {
@@ -680,7 +680,7 @@ impl Currency for NOK {
 }
 
 /// Brazilian Real
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BRL;
 impl Currency for BRL {
     fn code(&self) -> &'static str {
@@ -705,7 +705,7 @@ impl Currency for BRL {
 }
 
 /// Brunei Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BND;
 impl Currency for BND {
     fn code(&self) -> &'static str {
@@ -730,7 +730,7 @@ impl Currency for BND {
 }
 
 /// Bulgarian Lev
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BGN;
 impl Currency for BGN {
     fn code(&self) -> &'static str {
@@ -755,7 +755,7 @@ impl Currency for BGN {
 }
 
 /// Burundi Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct BIF;
 impl Currency for BIF {
     fn code(&self) -> &'static str {
@@ -780,7 +780,7 @@ impl Currency for BIF {
 }
 
 /// Cabo Verde Escudo
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CVE;
 impl Currency for CVE {
     fn code(&self) -> &'static str {
@@ -805,7 +805,7 @@ impl Currency for CVE {
 }
 
 /// Riel
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KHR;
 impl Currency for KHR {
     fn code(&self) -> &'static str {
@@ -830,7 +830,7 @@ impl Currency for KHR {
 }
 
 /// CFA Franc BEAC
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XAF;
 impl Currency for XAF {
     fn code(&self) -> &'static str {
@@ -855,7 +855,7 @@ impl Currency for XAF {
 }
 
 /// Canadian Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CAD;
 impl Currency for CAD {
     fn code(&self) -> &'static str {
@@ -880,7 +880,7 @@ impl Currency for CAD {
 }
 
 /// Cayman Islands Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KYD;
 impl Currency for KYD {
     fn code(&self) -> &'static str {
@@ -905,7 +905,7 @@ impl Currency for KYD {
 }
 
 /// Chilean Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CLP;
 impl Currency for CLP {
     fn code(&self) -> &'static str {
@@ -930,7 +930,7 @@ impl Currency for CLP {
 }
 
 /// Unidad de Fomento
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CLF;
 impl Currency for CLF {
     fn code(&self) -> &'static str {
@@ -955,7 +955,7 @@ impl Currency for CLF {
 }
 
 /// Yuan Renminbi
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CNY;
 impl Currency for CNY {
     fn code(&self) -> &'static str {
@@ -980,7 +980,7 @@ impl Currency for CNY {
 }
 
 /// Colombian Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct COP;
 impl Currency for COP {
     fn code(&self) -> &'static str {
@@ -1005,7 +1005,7 @@ impl Currency for COP {
 }
 
 /// Unidad de Valor Real
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct COU;
 impl Currency for COU {
     fn code(&self) -> &'static str {
@@ -1030,7 +1030,7 @@ impl Currency for COU {
 }
 
 /// Comorian Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KMF;
 impl Currency for KMF {
     fn code(&self) -> &'static str {
@@ -1055,7 +1055,7 @@ impl Currency for KMF {
 }
 
 /// Congolese Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CDF;
 impl Currency for CDF {
     fn code(&self) -> &'static str {
@@ -1080,7 +1080,7 @@ impl Currency for CDF {
 }
 
 /// New Zealand Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct NZD;
 impl Currency for NZD {
     fn code(&self) -> &'static str {
@@ -1105,7 +1105,7 @@ impl Currency for NZD {
 }
 
 /// Costa Rican Colon
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CRC;
 impl Currency for CRC {
     fn code(&self) -> &'static str {
@@ -1130,7 +1130,7 @@ impl Currency for CRC {
 }
 
 /// Cuban Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CUP;
 impl Currency for CUP {
     fn code(&self) -> &'static str {
@@ -1155,7 +1155,7 @@ impl Currency for CUP {
 }
 
 /// Peso Convertible
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CUC;
 impl Currency for CUC {
     fn code(&self) -> &'static str {
@@ -1180,7 +1180,7 @@ impl Currency for CUC {
 }
 
 /// Netherlands Antillean Guilder
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ANG;
 impl Currency for ANG {
     fn code(&self) -> &'static str {
@@ -1205,7 +1205,7 @@ impl Currency for ANG {
 }
 
 /// Czech Koruna
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CZK;
 impl Currency for CZK {
     fn code(&self) -> &'static str {
@@ -1230,7 +1230,7 @@ impl Currency for CZK {
 }
 
 /// Danish Krone
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct DKK;
 impl Currency for DKK {
     fn code(&self) -> &'static str {
@@ -1255,7 +1255,7 @@ impl Currency for DKK {
 }
 
 /// Djibouti Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct DJF;
 impl Currency for DJF {
     fn code(&self) -> &'static str {
@@ -1280,7 +1280,7 @@ impl Currency for DJF {
 }
 
 /// Dominican Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct DOP;
 impl Currency for DOP {
     fn code(&self) -> &'static str {
@@ -1305,7 +1305,7 @@ impl Currency for DOP {
 }
 
 /// Egyptian Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct EGP;
 impl Currency for EGP {
     fn code(&self) -> &'static str {
@@ -1330,7 +1330,7 @@ impl Currency for EGP {
 }
 
 /// El Salvador Colon
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SVC;
 impl Currency for SVC {
     fn code(&self) -> &'static str {
@@ -1355,7 +1355,7 @@ impl Currency for SVC {
 }
 
 /// Nakfa
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ERN;
 impl Currency for ERN {
     fn code(&self) -> &'static str {
@@ -1380,7 +1380,7 @@ impl Currency for ERN {
 }
 
 /// Lilangeni
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SZL;
 impl Currency for SZL {
     fn code(&self) -> &'static str {
@@ -1405,7 +1405,7 @@ impl Currency for SZL {
 }
 
 /// Ethiopian Birr
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ETB;
 impl Currency for ETB {
     fn code(&self) -> &'static str {
@@ -1430,7 +1430,7 @@ impl Currency for ETB {
 }
 
 /// Falkland Islands Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct FKP;
 impl Currency for FKP {
     fn code(&self) -> &'static str {
@@ -1455,7 +1455,7 @@ impl Currency for FKP {
 }
 
 /// Fiji Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct FJD;
 impl Currency for FJD {
     fn code(&self) -> &'static str {
@@ -1480,7 +1480,7 @@ impl Currency for FJD {
 }
 
 /// CFP Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XPF;
 impl Currency for XPF {
     fn code(&self) -> &'static str {
@@ -1505,7 +1505,7 @@ impl Currency for XPF {
 }
 
 /// Dalasi
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GMD;
 impl Currency for GMD {
     fn code(&self) -> &'static str {
@@ -1530,7 +1530,7 @@ impl Currency for GMD {
 }
 
 /// Lari
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GEL;
 impl Currency for GEL {
     fn code(&self) -> &'static str {
@@ -1555,7 +1555,7 @@ impl Currency for GEL {
 }
 
 /// Ghana Cedi
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GHS;
 impl Currency for GHS {
     fn code(&self) -> &'static str {
@@ -1580,7 +1580,7 @@ impl Currency for GHS {
 }
 
 /// Gibraltar Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GIP;
 impl Currency for GIP {
     fn code(&self) -> &'static str {
@@ -1605,7 +1605,7 @@ impl Currency for GIP {
 }
 
 /// Quetzal
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GTQ;
 impl Currency for GTQ {
     fn code(&self) -> &'static str {
@@ -1630,7 +1630,7 @@ impl Currency for GTQ {
 }
 
 /// Pound Sterling
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GBP;
 impl Currency for GBP {
     fn code(&self) -> &'static str {
@@ -1655,7 +1655,7 @@ impl Currency for GBP {
 }
 
 /// Guinean Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GNF;
 impl Currency for GNF {
     fn code(&self) -> &'static str {
@@ -1680,7 +1680,7 @@ impl Currency for GNF {
 }
 
 /// Guyana Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct GYD;
 impl Currency for GYD {
     fn code(&self) -> &'static str {
@@ -1705,7 +1705,7 @@ impl Currency for GYD {
 }
 
 /// Gourde
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct HTG;
 impl Currency for HTG {
     fn code(&self) -> &'static str {
@@ -1730,7 +1730,7 @@ impl Currency for HTG {
 }
 
 /// Lempira
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct HNL;
 impl Currency for HNL {
     fn code(&self) -> &'static str {
@@ -1755,7 +1755,7 @@ impl Currency for HNL {
 }
 
 /// Hong Kong Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct HKD;
 impl Currency for HKD {
     fn code(&self) -> &'static str {
@@ -1780,7 +1780,7 @@ impl Currency for HKD {
 }
 
 /// Forint
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct HUF;
 impl Currency for HUF {
     fn code(&self) -> &'static str {
@@ -1805,7 +1805,7 @@ impl Currency for HUF {
 }
 
 /// Iceland Krona
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ISK;
 impl Currency for ISK {
     fn code(&self) -> &'static str {
@@ -1830,7 +1830,7 @@ impl Currency for ISK {
 }
 
 /// Rupiah
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct IDR;
 impl Currency for IDR {
     fn code(&self) -> &'static str {
@@ -1855,7 +1855,7 @@ impl Currency for IDR {
 }
 
 /// SDR (Special Drawing Right)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XDR;
 impl Currency for XDR {
     fn code(&self) -> &'static str {
@@ -1880,7 +1880,7 @@ impl Currency for XDR {
 }
 
 /// Iranian Rial
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct IRR;
 impl Currency for IRR {
     fn code(&self) -> &'static str {
@@ -1905,7 +1905,7 @@ impl Currency for IRR {
 }
 
 /// Iraqi Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct IQD;
 impl Currency for IQD {
     fn code(&self) -> &'static str {
@@ -1930,7 +1930,7 @@ impl Currency for IQD {
 }
 
 /// New Israeli Sheqel
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ILS;
 impl Currency for ILS {
     fn code(&self) -> &'static str {
@@ -1955,7 +1955,7 @@ impl Currency for ILS {
 }
 
 /// Jamaican Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct JMD;
 impl Currency for JMD {
     fn code(&self) -> &'static str {
@@ -1980,7 +1980,7 @@ impl Currency for JMD {
 }
 
 /// Yen
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct JPY;
 impl Currency for JPY {
     fn code(&self) -> &'static str {
@@ -2005,7 +2005,7 @@ impl Currency for JPY {
 }
 
 /// Jordanian Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct JOD;
 impl Currency for JOD {
     fn code(&self) -> &'static str {
@@ -2030,7 +2030,7 @@ impl Currency for JOD {
 }
 
 /// Tenge
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KZT;
 impl Currency for KZT {
     fn code(&self) -> &'static str {
@@ -2055,7 +2055,7 @@ impl Currency for KZT {
 }
 
 /// Kenyan Shilling
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KES;
 impl Currency for KES {
     fn code(&self) -> &'static str {
@@ -2080,7 +2080,7 @@ impl Currency for KES {
 }
 
 /// North Korean Won
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KPW;
 impl Currency for KPW {
     fn code(&self) -> &'static str {
@@ -2105,7 +2105,7 @@ impl Currency for KPW {
 }
 
 /// Won
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KRW;
 impl Currency for KRW {
     fn code(&self) -> &'static str {
@@ -2130,7 +2130,7 @@ impl Currency for KRW {
 }
 
 /// Kuwaiti Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KWD;
 impl Currency for KWD {
     fn code(&self) -> &'static str {
@@ -2155,7 +2155,7 @@ impl Currency for KWD {
 }
 
 /// Som
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct KGS;
 impl Currency for KGS {
     fn code(&self) -> &'static str {
@@ -2180,7 +2180,7 @@ impl Currency for KGS {
 }
 
 /// Lao Kip
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct LAK;
 impl Currency for LAK {
     fn code(&self) -> &'static str {
@@ -2205,7 +2205,7 @@ impl Currency for LAK {
 }
 
 /// Lebanese Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct LBP;
 impl Currency for LBP {
     fn code(&self) -> &'static str {
@@ -2230,7 +2230,7 @@ impl Currency for LBP {
 }
 
 /// Loti
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct LSL;
 impl Currency for LSL {
     fn code(&self) -> &'static str {
@@ -2255,7 +2255,7 @@ impl Currency for LSL {
 }
 
 /// Rand
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ZAR;
 impl Currency for ZAR {
     fn code(&self) -> &'static str {
@@ -2280,7 +2280,7 @@ impl Currency for ZAR {
 }
 
 /// Liberian Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct LRD;
 impl Currency for LRD {
     fn code(&self) -> &'static str {
@@ -2305,7 +2305,7 @@ impl Currency for LRD {
 }
 
 /// Libyan Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct LYD;
 impl Currency for LYD {
     fn code(&self) -> &'static str {
@@ -2330,7 +2330,7 @@ impl Currency for LYD {
 }
 
 /// Swiss Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CHF;
 impl Currency for CHF {
     fn code(&self) -> &'static str {
@@ -2355,7 +2355,7 @@ impl Currency for CHF {
 }
 
 /// Pataca
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MOP;
 impl Currency for MOP {
     fn code(&self) -> &'static str {
@@ -2380,7 +2380,7 @@ impl Currency for MOP {
 }
 
 /// Denar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MKD;
 impl Currency for MKD {
     fn code(&self) -> &'static str {
@@ -2405,7 +2405,7 @@ impl Currency for MKD {
 }
 
 /// Malagasy Ariary
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MGA;
 impl Currency for MGA {
     fn code(&self) -> &'static str {
@@ -2430,7 +2430,7 @@ impl Currency for MGA {
 }
 
 /// Malawi Kwacha
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MWK;
 impl Currency for MWK {
     fn code(&self) -> &'static str {
@@ -2455,7 +2455,7 @@ impl Currency for MWK {
 }
 
 /// Malaysian Ringgit
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MYR;
 impl Currency for MYR {
     fn code(&self) -> &'static str {
@@ -2480,7 +2480,7 @@ impl Currency for MYR {
 }
 
 /// Rufiyaa
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MVR;
 impl Currency for MVR {
     fn code(&self) -> &'static str {
@@ -2505,7 +2505,7 @@ impl Currency for MVR {
 }
 
 /// Ouguiya
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MRU;
 impl Currency for MRU {
     fn code(&self) -> &'static str {
@@ -2530,7 +2530,7 @@ impl Currency for MRU {
 }
 
 /// Mauritius Rupee
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MUR;
 impl Currency for MUR {
     fn code(&self) -> &'static str {
@@ -2555,7 +2555,7 @@ impl Currency for MUR {
 }
 
 /// ADB Unit of Account
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XUA;
 impl Currency for XUA {
     fn code(&self) -> &'static str {
@@ -2580,7 +2580,7 @@ impl Currency for XUA {
 }
 
 /// Mexican Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MXN;
 impl Currency for MXN {
     fn code(&self) -> &'static str {
@@ -2605,7 +2605,7 @@ impl Currency for MXN {
 }
 
 /// Mexican Unidad de Inversion (UDI)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MXV;
 impl Currency for MXV {
     fn code(&self) -> &'static str {
@@ -2630,7 +2630,7 @@ impl Currency for MXV {
 }
 
 /// Moldovan Leu
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MDL;
 impl Currency for MDL {
     fn code(&self) -> &'static str {
@@ -2655,7 +2655,7 @@ impl Currency for MDL {
 }
 
 /// Tugrik
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MNT;
 impl Currency for MNT {
     fn code(&self) -> &'static str {
@@ -2680,7 +2680,7 @@ impl Currency for MNT {
 }
 
 /// Moroccan Dirham
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MAD;
 impl Currency for MAD {
     fn code(&self) -> &'static str {
@@ -2705,7 +2705,7 @@ impl Currency for MAD {
 }
 
 /// Mozambique Metical
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MZN;
 impl Currency for MZN {
     fn code(&self) -> &'static str {
@@ -2730,7 +2730,7 @@ impl Currency for MZN {
 }
 
 /// Kyat
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct MMK;
 impl Currency for MMK {
     fn code(&self) -> &'static str {
@@ -2755,7 +2755,7 @@ impl Currency for MMK {
 }
 
 /// Namibia Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct NAD;
 impl Currency for NAD {
     fn code(&self) -> &'static str {
@@ -2780,7 +2780,7 @@ impl Currency for NAD {
 }
 
 /// Nepalese Rupee
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct NPR;
 impl Currency for NPR {
     fn code(&self) -> &'static str {
@@ -2805,7 +2805,7 @@ impl Currency for NPR {
 }
 
 /// Cordoba Oro
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct NIO;
 impl Currency for NIO {
     fn code(&self) -> &'static str {
@@ -2830,7 +2830,7 @@ impl Currency for NIO {
 }
 
 /// Naira
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct NGN;
 impl Currency for NGN {
     fn code(&self) -> &'static str {
@@ -2855,7 +2855,7 @@ impl Currency for NGN {
 }
 
 /// Rial Omani
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct OMR;
 impl Currency for OMR {
     fn code(&self) -> &'static str {
@@ -2880,7 +2880,7 @@ impl Currency for OMR {
 }
 
 /// Pakistan Rupee
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PKR;
 impl Currency for PKR {
     fn code(&self) -> &'static str {
@@ -2905,7 +2905,7 @@ impl Currency for PKR {
 }
 
 /// Balboa
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PAB;
 impl Currency for PAB {
     fn code(&self) -> &'static str {
@@ -2930,7 +2930,7 @@ impl Currency for PAB {
 }
 
 /// Kina
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PGK;
 impl Currency for PGK {
     fn code(&self) -> &'static str {
@@ -2955,7 +2955,7 @@ impl Currency for PGK {
 }
 
 /// Guarani
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PYG;
 impl Currency for PYG {
     fn code(&self) -> &'static str {
@@ -2980,7 +2980,7 @@ impl Currency for PYG {
 }
 
 /// Sol
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PEN;
 impl Currency for PEN {
     fn code(&self) -> &'static str {
@@ -3005,7 +3005,7 @@ impl Currency for PEN {
 }
 
 /// Philippine Peso
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PHP;
 impl Currency for PHP {
     fn code(&self) -> &'static str {
@@ -3030,7 +3030,7 @@ impl Currency for PHP {
 }
 
 /// Zloty
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct PLN;
 impl Currency for PLN {
     fn code(&self) -> &'static str {
@@ -3055,7 +3055,7 @@ impl Currency for PLN {
 }
 
 /// Qatari Rial
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct QAR;
 impl Currency for QAR {
     fn code(&self) -> &'static str {
@@ -3080,7 +3080,7 @@ impl Currency for QAR {
 }
 
 /// Romanian Leu
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RON;
 impl Currency for RON {
     fn code(&self) -> &'static str {
@@ -3105,7 +3105,7 @@ impl Currency for RON {
 }
 
 /// Russian Ruble
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RUB;
 impl Currency for RUB {
     fn code(&self) -> &'static str {
@@ -3130,7 +3130,7 @@ impl Currency for RUB {
 }
 
 /// Rwanda Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RWF;
 impl Currency for RWF {
     fn code(&self) -> &'static str {
@@ -3155,7 +3155,7 @@ impl Currency for RWF {
 }
 
 /// Saint Helena Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SHP;
 impl Currency for SHP {
     fn code(&self) -> &'static str {
@@ -3180,7 +3180,7 @@ impl Currency for SHP {
 }
 
 /// Tala
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct WST;
 impl Currency for WST {
     fn code(&self) -> &'static str {
@@ -3205,7 +3205,7 @@ impl Currency for WST {
 }
 
 /// Dobra
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct STN;
 impl Currency for STN {
     fn code(&self) -> &'static str {
@@ -3230,7 +3230,7 @@ impl Currency for STN {
 }
 
 /// Saudi Riyal
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SAR;
 impl Currency for SAR {
     fn code(&self) -> &'static str {
@@ -3255,7 +3255,7 @@ impl Currency for SAR {
 }
 
 /// Serbian Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct RSD;
 impl Currency for RSD {
     fn code(&self) -> &'static str {
@@ -3280,7 +3280,7 @@ impl Currency for RSD {
 }
 
 /// Seychelles Rupee
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SCR;
 impl Currency for SCR {
     fn code(&self) -> &'static str {
@@ -3305,7 +3305,7 @@ impl Currency for SCR {
 }
 
 /// Leone
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SLE;
 impl Currency for SLE {
     fn code(&self) -> &'static str {
@@ -3330,7 +3330,7 @@ impl Currency for SLE {
 }
 
 /// Singapore Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SGD;
 impl Currency for SGD {
     fn code(&self) -> &'static str {
@@ -3355,7 +3355,7 @@ impl Currency for SGD {
 }
 
 /// Sucre
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XSU;
 impl Currency for XSU {
     fn code(&self) -> &'static str {
@@ -3380,7 +3380,7 @@ impl Currency for XSU {
 }
 
 /// Solomon Islands Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SBD;
 impl Currency for SBD {
     fn code(&self) -> &'static str {
@@ -3405,7 +3405,7 @@ impl Currency for SBD {
 }
 
 /// Somali Shilling
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SOS;
 impl Currency for SOS {
     fn code(&self) -> &'static str {
@@ -3430,7 +3430,7 @@ impl Currency for SOS {
 }
 
 /// South Sudanese Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SSP;
 impl Currency for SSP {
     fn code(&self) -> &'static str {
@@ -3455,7 +3455,7 @@ impl Currency for SSP {
 }
 
 /// Sri Lanka Rupee
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct LKR;
 impl Currency for LKR {
     fn code(&self) -> &'static str {
@@ -3480,7 +3480,7 @@ impl Currency for LKR {
 }
 
 /// Sudanese Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SDG;
 impl Currency for SDG {
     fn code(&self) -> &'static str {
@@ -3505,7 +3505,7 @@ impl Currency for SDG {
 }
 
 /// Surinam Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SRD;
 impl Currency for SRD {
     fn code(&self) -> &'static str {
@@ -3530,7 +3530,7 @@ impl Currency for SRD {
 }
 
 /// Swedish Krona
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SEK;
 impl Currency for SEK {
     fn code(&self) -> &'static str {
@@ -3555,7 +3555,7 @@ impl Currency for SEK {
 }
 
 /// WIR Euro
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CHE;
 impl Currency for CHE {
     fn code(&self) -> &'static str {
@@ -3580,7 +3580,7 @@ impl Currency for CHE {
 }
 
 /// WIR Franc
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct CHW;
 impl Currency for CHW {
     fn code(&self) -> &'static str {
@@ -3605,7 +3605,7 @@ impl Currency for CHW {
 }
 
 /// Syrian Pound
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct SYP;
 impl Currency for SYP {
     fn code(&self) -> &'static str {
@@ -3630,7 +3630,7 @@ impl Currency for SYP {
 }
 
 /// New Taiwan Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TWD;
 impl Currency for TWD {
     fn code(&self) -> &'static str {
@@ -3655,7 +3655,7 @@ impl Currency for TWD {
 }
 
 /// Somoni
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TJS;
 impl Currency for TJS {
     fn code(&self) -> &'static str {
@@ -3680,7 +3680,7 @@ impl Currency for TJS {
 }
 
 /// Tanzanian Shilling
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TZS;
 impl Currency for TZS {
     fn code(&self) -> &'static str {
@@ -3705,7 +3705,7 @@ impl Currency for TZS {
 }
 
 /// Baht
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct THB;
 impl Currency for THB {
     fn code(&self) -> &'static str {
@@ -3730,7 +3730,7 @@ impl Currency for THB {
 }
 
 /// Pa’anga
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TOP;
 impl Currency for TOP {
     fn code(&self) -> &'static str {
@@ -3755,7 +3755,7 @@ impl Currency for TOP {
 }
 
 /// Trinidad and Tobago Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TTD;
 impl Currency for TTD {
     fn code(&self) -> &'static str {
@@ -3780,7 +3780,7 @@ impl Currency for TTD {
 }
 
 /// Tunisian Dinar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TND;
 impl Currency for TND {
     fn code(&self) -> &'static str {
@@ -3805,7 +3805,7 @@ impl Currency for TND {
 }
 
 /// Turkish Lira
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TRY;
 impl Currency for TRY {
     fn code(&self) -> &'static str {
@@ -3830,7 +3830,7 @@ impl Currency for TRY {
 }
 
 /// Turkmenistan New Manat
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct TMT;
 impl Currency for TMT {
     fn code(&self) -> &'static str {
@@ -3855,7 +3855,7 @@ impl Currency for TMT {
 }
 
 /// Uganda Shilling
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct UGX;
 impl Currency for UGX {
     fn code(&self) -> &'static str {
@@ -3880,7 +3880,7 @@ impl Currency for UGX {
 }
 
 /// Hryvnia
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct UAH;
 impl Currency for UAH {
     fn code(&self) -> &'static str {
@@ -3905,7 +3905,7 @@ impl Currency for UAH {
 }
 
 /// UAE Dirham
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AED;
 impl Currency for AED {
     fn code(&self) -> &'static str {
@@ -3930,7 +3930,7 @@ impl Currency for AED {
 }
 
 /// US Dollar (Next day)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct USN;
 impl Currency for USN {
     fn code(&self) -> &'static str {
@@ -3955,7 +3955,7 @@ impl Currency for USN {
 }
 
 /// Peso Uruguayo
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct UYU;
 impl Currency for UYU {
     fn code(&self) -> &'static str {
@@ -3980,7 +3980,7 @@ impl Currency for UYU {
 }
 
 /// Uruguay Peso en Unidades Indexadas (UI)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct UYI;
 impl Currency for UYI {
     fn code(&self) -> &'static str {
@@ -4005,7 +4005,7 @@ impl Currency for UYI {
 }
 
 /// Unidad Previsional
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct UYW;
 impl Currency for UYW {
     fn code(&self) -> &'static str {
@@ -4030,7 +4030,7 @@ impl Currency for UYW {
 }
 
 /// Uzbekistan Sum
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct UZS;
 impl Currency for UZS {
     fn code(&self) -> &'static str {
@@ -4055,7 +4055,7 @@ impl Currency for UZS {
 }
 
 /// Vatu
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct VUV;
 impl Currency for VUV {
     fn code(&self) -> &'static str {
@@ -4080,7 +4080,7 @@ impl Currency for VUV {
 }
 
 /// Bolívar Soberano
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct VES;
 impl Currency for VES {
     fn code(&self) -> &'static str {
@@ -4105,7 +4105,7 @@ impl Currency for VES {
 }
 
 /// Bolívar Soberano
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct VED;
 impl Currency for VED {
     fn code(&self) -> &'static str {
@@ -4130,7 +4130,7 @@ impl Currency for VED {
 }
 
 /// Dong
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct VND;
 impl Currency for VND {
     fn code(&self) -> &'static str {
@@ -4155,7 +4155,7 @@ impl Currency for VND {
 }
 
 /// Yemeni Rial
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct YER;
 impl Currency for YER {
     fn code(&self) -> &'static str {
@@ -4180,7 +4180,7 @@ impl Currency for YER {
 }
 
 /// Zambian Kwacha
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ZMW;
 impl Currency for ZMW {
     fn code(&self) -> &'static str {
@@ -4205,7 +4205,7 @@ impl Currency for ZMW {
 }
 
 /// Zimbabwe Dollar
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ZWL;
 impl Currency for ZWL {
     fn code(&self) -> &'static str {
@@ -4230,7 +4230,7 @@ impl Currency for ZWL {
 }
 
 /// Zimbabwe Gold
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ZWG;
 impl Currency for ZWG {
     fn code(&self) -> &'static str {
@@ -4255,7 +4255,7 @@ impl Currency for ZWG {
 }
 
 /// Bond Markets Unit European Composite Unit (EURCO)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XBA;
 impl Currency for XBA {
     fn code(&self) -> &'static str {
@@ -4280,7 +4280,7 @@ impl Currency for XBA {
 }
 
 /// Bond Markets Unit European Monetary Unit (E.M.U.-6)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XBB;
 impl Currency for XBB {
     fn code(&self) -> &'static str {
@@ -4305,7 +4305,7 @@ impl Currency for XBB {
 }
 
 /// Bond Markets Unit European Unit of Account 9 (E.U.A.-9)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XBC;
 impl Currency for XBC {
     fn code(&self) -> &'static str {
@@ -4330,7 +4330,7 @@ impl Currency for XBC {
 }
 
 /// Bond Markets Unit European Unit of Account 17 (E.U.A.-17)
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XBD;
 impl Currency for XBD {
     fn code(&self) -> &'static str {
@@ -4355,7 +4355,7 @@ impl Currency for XBD {
 }
 
 /// Codes specifically reserved for testing purposes
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XTS;
 impl Currency for XTS {
     fn code(&self) -> &'static str {
@@ -4380,7 +4380,7 @@ impl Currency for XTS {
 }
 
 /// The codes assigned for transactions where no currency is involved
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XXX;
 impl Currency for XXX {
     fn code(&self) -> &'static str {
@@ -4405,7 +4405,7 @@ impl Currency for XXX {
 }
 
 /// Gold
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XAU;
 impl Currency for XAU {
     fn code(&self) -> &'static str {
@@ -4430,7 +4430,7 @@ impl Currency for XAU {
 }
 
 /// Palladium
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XPD;
 impl Currency for XPD {
     fn code(&self) -> &'static str {
@@ -4455,7 +4455,7 @@ impl Currency for XPD {
 }
 
 /// Platinum
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XPT;
 impl Currency for XPT {
     fn code(&self) -> &'static str {
@@ -4480,7 +4480,7 @@ impl Currency for XPT {
 }
 
 /// Silver
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct XAG;
 impl Currency for XAG {
     fn code(&self) -> &'static str {

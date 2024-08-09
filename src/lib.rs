@@ -209,7 +209,7 @@ where
     }
 }
 
-/// Adds two Money instances with the same statically-typed currencies.
+/// Adds two Money instances with the same statically-typed currency.
 /// Attempting to add two instances with _different_ statically-typed
 /// Currencies simply won't compile.
 impl<C> Add for Money<C>
@@ -305,7 +305,7 @@ where
     }
 }
 
-/// Subtracts Money instances with statically-typed currencies.
+/// Subtracts Money instances with the same statically-typed currency.
 impl<C> Sub for Money<C>
 where
     C: Currency,
@@ -385,7 +385,7 @@ where
     }
 }
 
-/// Multiplies instances of Money with statically-typed currencies.
+/// Multiplies instances of Money with the same statically-typed currency.
 impl<C> Mul for Money<C>
 where
     C: Currency,
@@ -465,7 +465,7 @@ where
     }
 }
 
-/// Divides instances of Money with statically-typed currencies.
+/// Divides instances of Money with the same statically-typed currency.
 impl<C> Div for Money<C>
 where
     C: Currency,
@@ -545,8 +545,8 @@ where
     }
 }
 
-/// Calculates the modulo remainder of dividing instances with
-/// statically-typed currencies.
+/// Calculates the modulo remainder of dividing Money instances with
+/// the same statically-typed currency.
 impl<C> Rem for Money<C>
 where
     C: Currency,
@@ -652,6 +652,29 @@ impl<'c> Neg for Money<&'c dyn Currency> {
         Self {
             amount: -self.amount,
             currency: self.currency,
+        }
+    }
+}
+
+/// Allows ordering comparisons for Money instances with the same
+/// statically-typed currency.
+impl<C> PartialOrd for Money<C>
+where
+    C: Currency + PartialOrd,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.amount.partial_cmp(&other.amount)
+    }
+}
+
+/// Allows ordering comparisons for Money instances with
+/// dynamically-typed currencies.
+impl<'c> PartialOrd for Money<&'c dyn Currency> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        if self.currency.code() == other.currency.code() {
+            self.amount.partial_cmp(&other.amount)
+        } else {
+            None
         }
     }
 }
@@ -1135,5 +1158,27 @@ mod tests {
             Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointTowardZero),
             Money::new(Decimal::ONE, USD)
         );
+    }
+
+    #[test]
+    fn partial_ord() {
+        assert!(Money::new(Decimal::ONE, USD) < Money::new(Decimal::TWO, USD));
+        assert!(Money::new(Decimal::TWO, USD) > Money::new(Decimal::ONE, USD));
+
+        let currency_usd = CURRENCIES.get("USD").unwrap();
+        let currency_jpy = CURRENCIES.get("JPY").unwrap();
+        assert!(Money::new(Decimal::ONE, currency_usd) < Money::new(Decimal::TWO, currency_usd));
+        assert!(Money::new(Decimal::TWO, currency_usd) > Money::new(Decimal::ONE, currency_usd));
+
+        // different currencies -> incomparable
+        assert_eq!(
+            Money::new(Decimal::ONE, currency_usd)
+                .partial_cmp(&Money::new(Decimal::TWO, currency_jpy)),
+            None
+        );
+
+        // different currencies -> neither greater than nor less than
+        assert!(!(Money::new(Decimal::ONE, currency_usd) < Money::new(Decimal::TWO, currency_jpy)));
+        assert!(!(Money::new(Decimal::TWO, currency_usd) > Money::new(Decimal::ONE, currency_jpy)));
     }
 }
