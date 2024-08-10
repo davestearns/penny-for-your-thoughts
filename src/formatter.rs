@@ -6,6 +6,18 @@ use thiserror::Error;
 use crate::Currency;
 
 /// Formats [Money] instances into Strings.
+///
+/// The positive, negative, and zero templates can use any
+/// of the following tokens:
+/// * `{s}` = The currency symbol (e.g., "$"), or empty if the currency has no symbol.
+/// * `{c}` = The currency code (e.g., "USD").
+/// * `{a}` = The amount formatted according to the other properties (e.g., "1,000.00").
+/// * `{s|c}` = The currency symbol, or the currency code if the currency
+///   has no symbol.
+/// * `{s|c_}` = Same as `{s|c}` but when there is no symbol, the code includes a
+///   trailing space to offset it from the amount.
+/// * `{_c|s}` = Same as `{s|c}` but with there is no symbol, the code includes a
+///   leading space to offset it from the amount.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Formatter {
     /// An explicit number of decimal places to round to and display.
