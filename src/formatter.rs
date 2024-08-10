@@ -1,4 +1,46 @@
+use std::borrow::Cow;
+
 use rust_decimal::{Decimal, RoundingStrategy};
+use thiserror::Error;
+
+use crate::Currency;
+
+pub trait FormatCurrency {
+    fn code(&self) -> &'static str;
+    fn symbol(&self) -> &'static str;
+    fn minor_units(&self) -> u32;
+}
+
+impl<C> FormatCurrency for C
+where
+    C: Currency,
+{
+    fn code(&self) -> &'static str {
+        self.code()
+    }
+
+    fn symbol(&self) -> &'static str {
+        self.symbol()
+    }
+
+    fn minor_units(&self) -> u32 {
+        self.minor_units()
+    }
+}
+
+impl<'c> FormatCurrency for &'c dyn Currency {
+    fn code(&self) -> &'static str {
+        (*self).code()
+    }
+
+    fn symbol(&self) -> &'static str {
+        (*self).symbol()
+    }
+
+    fn minor_units(&self) -> u32 {
+        (*self).minor_units()
+    }
+}
 
 /// Formats [Money] instances into Strings.
 #[derive(Debug, Clone, PartialEq)]
@@ -46,18 +88,83 @@ impl Default for Formatter {
             digit_grouping: 3,
             digit_groupings: None,
             digit_group_separator: ",",
-            positive_template: "{s}{a}",
-            negative_template: "-{s}{a}",
+            positive_template: "{s|c_}{a}",
+            negative_template: "-{s|c_}{a}",
             zero_template: None,
         }
     }
 }
 
+#[derive(Debug, Error, Clone, PartialEq)]
+pub enum FormatError {
+    #[error("format string contains an unterminated token, e.g., `{{blah`")]
+    UnterminatedToken,
+    #[error("invalid formatting token: `{0}`")]
+    InvalidToken(String),
+}
+
 impl Formatter {
+    pub fn format(&self, amount: Decimal, currency: &dyn Currency) -> Result<String, FormatError> {
+        let formatted_amount = self.format_amount(amount, currency.minor_units());
+        let template = if amount.is_zero() {
+            self.zero_template.unwrap_or(self.positive_template)
+        } else if amount.is_sign_positive() {
+            self.positive_template
+        } else {
+            self.negative_template
+        };
+
+        let mut output = String::with_capacity(formatted_amount.len() + template.len());
+        let mut iter = template.chars();
+
+        while let Some(ch) = iter.next() {
+            if ch == '{' {
+                let token: String = iter.by_ref().take_while(|c| *c != '}').collect();
+                if token.is_empty() {
+                    return Err(FormatError::UnterminatedToken);
+                }
+                let resolved = match token.as_str() {
+                    "a" => Cow::Borrowed(formatted_amount.as_str()),
+                    "s" => Cow::Borrowed(currency.symbol()),
+                    "c" => Cow::Borrowed(currency.code()),
+                    "s|c" => {
+                        if currency.symbol().is_empty() {
+                            Cow::Borrowed(currency.code())
+                        } else {
+                            Cow::Borrowed(currency.symbol())
+                        }
+                    }
+                    "s|c_" => {
+                        if currency.symbol().is_empty() {
+                            Cow::Owned(format!("{} ", currency.code()))
+                        } else {
+                            Cow::Borrowed(currency.symbol())
+                        }
+                    }
+                    "_c|s" => {
+                        if currency.symbol().is_empty() {
+                            Cow::Owned(format!(" {}", currency.code()))
+                        } else {
+                            Cow::Borrowed(currency.symbol())
+                        }
+                    }
+                    _ => Cow::Borrowed(""),
+                };
+                if resolved.is_empty() {
+                    return Err(FormatError::InvalidToken(token));
+                }
+                output.push_str(&resolved);
+            } else {
+                output.push(ch)
+            }
+        }
+        Ok(output)
+    }
+
     /// Formats a Decimal amount. If `self.decimal_places` is `None` the
     /// `default_decimal_places` will be used, which is typically the number
     /// of minor units in the currency.
-    pub fn format_amount(&self, amount: Decimal, default_decimal_places: u32) -> String {
+    fn format_amount(&self, amount: Decimal, default_decimal_places: u32) -> String {
         // round to the desired number of decimal places
         let dp = self.decimal_places.unwrap_or(default_decimal_places);
         let rounded_amount = amount.round_dp_with_strategy(dp, self.rounding_strategy);
@@ -119,6 +226,11 @@ impl Formatter {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        iso_currencies::{USD, XXX},
+        Money,
+    };
+
     use super::*;
 
     #[test]
@@ -150,6 +262,16 @@ mod tests {
         assert_eq!(
             Formatter::default().format_amount(Decimal::ZERO, 2),
             "0.00".to_string()
+        );
+    }
+
+    #[test]
+    fn format_amount_negative() {
+        // sign is handled in the format templates, so should never
+        // appear in the amount.
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::NEGATIVE_ONE, 2),
+            "1.00".to_string()
         );
     }
 
@@ -215,6 +337,33 @@ mod tests {
         assert_eq!(
             formatter.format_amount(Decimal::new(123456789123456789, 2), 2),
             "1234567891234567.89".to_string()
+        );
+    }
+
+    #[test]
+    fn format_default() {
+        let m = Money::new(Decimal::new(123456789123456789, 2), USD);
+        assert_eq!(
+            Formatter::default().format(m.amount, &m.currency),
+            Ok("$1,234,567,891,234,567.89".to_string()),
+        );
+    }
+
+    #[test]
+    fn format_default_negative() {
+        let m = Money::new(-Decimal::new(123456789123456789, 2), USD);
+        assert_eq!(
+            Formatter::default().format(m.amount, &m.currency),
+            Ok("-$1,234,567,891,234,567.89".to_string()),
+        );
+    }
+
+    #[test]
+    fn format_default_no_symbol() {
+        let m = Money::new(Decimal::new(123456789123456789, 0), XXX);
+        assert_eq!(
+            Formatter::default().format(m.amount, &m.currency),
+            Ok("XXX 123,456,789,123,456,789".to_string()),
         );
     }
 }

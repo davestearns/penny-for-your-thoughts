@@ -3,6 +3,7 @@ use std::{
     ops::{Add, Div, Mul, Neg, Rem, Sub},
 };
 
+use formatter::{FormatError, Formatter};
 use rust_decimal::{Decimal, MathematicalOps};
 use thiserror::Error;
 
@@ -10,8 +11,8 @@ use thiserror::Error;
 pub use rust_decimal::RoundingStrategy;
 
 pub mod currency_map;
-pub mod iso_currencies;
 pub mod formatter;
+pub mod iso_currencies;
 
 /// Common trait for all currencies.
 pub trait Currency {
@@ -167,6 +168,12 @@ where
     pub fn currency(&self) -> C {
         self.currency
     }
+
+    /// Returns a formatted version of this instance using the
+    /// supplied [Formatter].
+    pub fn format(&self, formatter: Formatter) -> Result<String, FormatError> {
+        formatter.format(self.amount, &self.currency)
+    }
 }
 
 /// Functions specifically for borrowed dynamically-typed currencies.
@@ -174,6 +181,12 @@ impl<'c> Money<&'c dyn Currency> {
     /// Returns the reference to the dynamically-typed Currency.
     pub fn currency(&self) -> &'c dyn Currency {
         self.currency
+    }
+
+    /// Returns a formatted version of this instance using the
+    /// supplied [Formatter].
+    pub fn format(&self, formatter: Formatter) -> Result<String, FormatError> {
+        formatter.format(self.amount, self.currency)
     }
 }
 
