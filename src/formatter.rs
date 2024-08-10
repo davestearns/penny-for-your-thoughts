@@ -214,6 +214,24 @@ mod tests {
     }
 
     #[test]
+    fn format_amount_short() {
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::new(12, 0), 2),
+            "12.00".to_string(),
+        );
+
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::new(123, 0), 2),
+            "123.00".to_string(),
+        );
+
+        assert_eq!(
+            Formatter::default().format_amount(Decimal::new(1234, 0), 2),
+            "1,234.00".to_string(),
+        );
+    }
+
+    #[test]
     fn format_amount_no_frac() {
         assert_eq!(
             Formatter::default().format_amount(Decimal::new(123456789123456789, 0), 2),
