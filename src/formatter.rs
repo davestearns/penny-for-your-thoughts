@@ -412,4 +412,13 @@ mod tests {
             Err(FormatError::InvalidToken(String::new())),
         );
     }
+
+    #[test]
+    fn format_decimal_places() {
+        let f = Formatter {
+            decimal_places: Some(4),
+            ..Default::default()
+        };
+        assert_eq!(f.format(Decimal::new(123456,4), &USD), Ok("$12.3456".to_string()));
+    }
 }

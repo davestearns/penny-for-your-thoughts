@@ -499,7 +499,7 @@ By default the amount will be rounded and formatted to the number of currency mi
 // XAU = Gold, which has no symbol, and 0 minor units
 let m = Money::new(Decimal:new(12345,0), XAU);
 let f = Formatter {
-    decimal_places: 2,
+    decimal_places: Some(2),
     ..Default::default()
 };
 assert_eq!(m.format(&f), Ok("XAU 12,345.00".to_string()));
@@ -515,7 +515,7 @@ let f = Formatter {
     // then the next 2 digits to the left of those, and then
     // the next 2 digits to the left of those, and then the 
     // rest without any grouping.
-    digit_groupings: &[3,2,2],
+    digit_groupings: Some(&[3,2,2]),
     ..Default::default()
 };
 assert_eq!(m.format(&f), Ok("₹12,34,56,789.00".to_string()));
