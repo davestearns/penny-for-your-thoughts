@@ -1,9 +1,10 @@
+//! Supports powerful formatting of Money values.
 use rust_decimal::{Decimal, RoundingStrategy};
 use thiserror::Error;
 
 use crate::Currency;
 
-/// Formats [Money] instances into Strings.
+/// Formats Money instances into Strings.
 ///
 /// The positive, negative, and zero templates can use any
 /// of the following tokens:
