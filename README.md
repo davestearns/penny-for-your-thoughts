@@ -1,6 +1,8 @@
 # Penny for your Thoughts (on Rust trait bounds)
 
 [![CI](https://github.com/davestearns/penny-for-your-thoughts/actions/workflows/ci.yml/badge.svg)](https://github.com/davestearns/penny-for-your-thoughts/actions/workflows/ci.yml)
+[![Crates.io Version](https://img.shields.io/crates/v/doubloon)](https://crates.io/crates/doubloon)
+[![Documentation](https://docs.rs/doubloon/badge.svg)](https://docs.rs/doubloon)
 
 **AKA: doubloon**
 
