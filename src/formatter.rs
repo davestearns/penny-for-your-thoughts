@@ -5,43 +5,6 @@ use thiserror::Error;
 
 use crate::Currency;
 
-pub trait FormatCurrency {
-    fn code(&self) -> &'static str;
-    fn symbol(&self) -> &'static str;
-    fn minor_units(&self) -> u32;
-}
-
-impl<C> FormatCurrency for C
-where
-    C: Currency,
-{
-    fn code(&self) -> &'static str {
-        self.code()
-    }
-
-    fn symbol(&self) -> &'static str {
-        self.symbol()
-    }
-
-    fn minor_units(&self) -> u32 {
-        self.minor_units()
-    }
-}
-
-impl<'c> FormatCurrency for &'c dyn Currency {
-    fn code(&self) -> &'static str {
-        (*self).code()
-    }
-
-    fn symbol(&self) -> &'static str {
-        (*self).symbol()
-    }
-
-    fn minor_units(&self) -> u32 {
-        (*self).minor_units()
-    }
-}
-
 /// Formats [Money] instances into Strings.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Formatter {
