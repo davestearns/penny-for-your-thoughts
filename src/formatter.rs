@@ -74,8 +74,6 @@ impl Default for Formatter {
 
 #[derive(Debug, Error, Clone, PartialEq)]
 pub enum FormatError {
-    #[error("format string contains an unterminated token, e.g., `{{blah`")]
-    UnterminatedToken,
     #[error("invalid formatting token: `{0}`")]
     InvalidToken(String),
 }
@@ -97,9 +95,6 @@ impl Formatter {
         while let Some(ch) = iter.next() {
             if ch == '{' {
                 let token: String = iter.by_ref().take_while(|c| *c != '}').collect();
-                if token.is_empty() {
-                    return Err(FormatError::UnterminatedToken);
-                }
                 let resolved = match token.as_str() {
                     "a" => Cow::Borrowed(formatted_amount.as_str()),
                     "s" => Cow::Borrowed(currency.symbol()),
@@ -387,10 +382,34 @@ mod tests {
     #[test]
     fn format_custom_zero_template() {
         let f = Formatter {
-            zero_template: Some("zero"),
+            zero_template: Some("free!"),
             ..Default::default()
         };
-        assert_eq!(f.format(Decimal::ZERO, &USD), Ok("zero".to_string()));
+        assert_eq!(f.format(Decimal::ZERO, &USD), Ok("free!".to_string()));
         assert_eq!(f.format(Decimal::ONE, &USD), Ok("$1.00".to_string()))
+    }
+
+    #[test]
+    fn format_invalid_template_token() {
+        let f = Formatter {
+            positive_template: "{a}{invalid}",
+            ..Default::default()
+        };
+        assert_eq!(
+            f.format(Decimal::new(1234, 0), &USD),
+            Err(FormatError::InvalidToken("invalid".to_string()))
+        );
+    }
+
+    #[test]
+    fn format_empty_template_token() {
+        let f = Formatter {
+            positive_template: "foo {}",
+            ..Default::default()
+        };
+        assert_eq!(
+            f.format(Decimal::new(1234, 0), &USD),
+            Err(FormatError::InvalidToken(String::new())),
+        );
     }
 }

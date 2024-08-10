@@ -171,7 +171,7 @@ where
 
     /// Returns a formatted version of this instance using the
     /// supplied [Formatter].
-    pub fn format(&self, formatter: Formatter) -> Result<String, FormatError> {
+    pub fn format(&self, formatter: &Formatter) -> Result<String, FormatError> {
         formatter.format(self.amount, &self.currency)
     }
 }
@@ -185,7 +185,7 @@ impl<'c> Money<&'c dyn Currency> {
 
     /// Returns a formatted version of this instance using the
     /// supplied [Formatter].
-    pub fn format(&self, formatter: Formatter) -> Result<String, FormatError> {
+    pub fn format(&self, formatter: &Formatter) -> Result<String, FormatError> {
         formatter.format(self.amount, self.currency)
     }
 }

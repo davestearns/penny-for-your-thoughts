@@ -454,6 +454,84 @@ where
 }
 ```
 
+The same technique (more or less) is used to support `PartialOrd`. That trait allow you to return `None` if the two instances are incomparable, which is what we return when the dynamically-typed currencies are different.
+
+## Formatting
+
+This crate also supports formatting `Money` instances into strings for display. The `Formatter` gives you complete control over how the `Money` instance will look:
+
+```rust
+let m = Money::new(Decimal::new(123456789,2), EUR);
+assert_eq!(m.format(&Formatter::default()), Ok("€1,234,567.89".to_string()));
+
+let custom_formatter = Formatter {
+    decimal_separator = ",",
+    digit_group_separator = ".",
+    positive_template: "{a} {s}",
+    negative_template: "({a} {s})",
+    ..Default::default()
+};
+assert_eq!(m.format(&custom_formatter), Ok("1.234.567,89 €".to_string()));
+```
+
+The templates can use any of the following as replacement tokens:
+
+* `{a}` = The amount formatted according to the other properties (e.g., "1,000.00").
+* `{s}` = The currency symbol (e.g., "$"), or empty if the currency has no symbol.
+* `{c}` = The currency code (e.g., "USD").
+* `{s|c}` = The currency symbol, or the currency code if the currency has no symbol.
+* `{s|c_}` = Same as `{s|c}` but when there is no symbol, the code includes a trailing space to offset it from the amount when it appears right before the amount.
+* `{s|_c}` = Same as `{s|c}` but with there is no symbol, the code includes a leading space to offset it from the amount when it appears right after the amount.
+
+The last two are handy when you want currency symbols to appear adjacent to the formatted amount, but when falling back to the code, you want a space before or after to offset it from the formatted amount. For example:
+
+```rust
+// XAU = Gold, which has no symbol, and 0 minor units
+let m = Money::new(Decimal:new(12345,0), XAU);
+// The default format uses `{s|c_}`, so when falling back
+// to the code, it adds a space between the code and amount.
+assert_eq!(m.format(&Formatter::default()), Ok("XAU 12,345".to_string()));
+```
+
+By default the amount will be rounded and formatted to the number of currency minor units. But you can override this by setting the `decimal_places` property on the `Formatter`.
+
+```rust
+// XAU = Gold, which has no symbol, and 0 minor units
+let m = Money::new(Decimal:new(12345,0), XAU);
+let f = Formatter {
+    decimal_places: 2,
+    ..Default::default()
+};
+assert_eq!(m.format(&f), Ok("XAU 12,345.00".to_string()));
+```
+
+The `Formatter` also supports irregular digit groupings, such as the _lakh_ and _crore_ system in India:
+
+```rust
+let m = Money::new(Decimal:new(123456789,0), INR);
+let f = Formatter {
+    // these are expressed right-to-left, so this pattern
+    // causes the three right-most digits to be grouped,
+    // then the next 2 digits to the left of those, and then
+    // the next 2 digits to the left of those, and then the 
+    // rest without any grouping.
+    digit_groupings: &[3,2,2],
+    ..Default::default()
+};
+assert_eq!(m.format(&f), Ok("₹12,34,56,789.00".to_string()));
+```
+
+By default, zero values are formatted using the `positive_template`, but you can optionally specify a different template for zero values:
+
+```rust
+let m = Money::new(Decimal::ZERO, USD);
+let f = Formatter {
+    zero_template: Some("free!"),
+    ..Default::default()
+};
+assert_eq!(m.format(&f), Ok("free!".to_string()));
+```
+
 ## Marker Trait for New
 
 When we first saw the `Money::new()` method, I noted that it technically allows one to construct a `Money` with something that isn't actually a `Currency`. At first I tried to work around this by putting `new()` into the specific `impl` blocks like so, but this doesn't compile:
