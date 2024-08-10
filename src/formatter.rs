@@ -7,9 +7,11 @@ use crate::Currency;
 ///
 /// The positive, negative, and zero templates can use any
 /// of the following tokens:
+/// * `{a}` = The amount formatted according to the other properties (e.g., "1,000.00").
+///   Note that this will never include a sign, even for negative amounts, so that you
+///   can control where/how the sign appears via the `negative_template`.
 /// * `{s}` = The currency symbol (e.g., "$"), or empty if the currency has no symbol.
 /// * `{c}` = The currency code (e.g., "USD").
-/// * `{a}` = The amount formatted according to the other properties (e.g., "1,000.00").
 /// * `{s|c}` = The currency symbol, or the currency code if the currency
 ///   has no symbol.
 /// * `{s|c_}` = Same as `{s|c}` but when there is no symbol, the code includes a

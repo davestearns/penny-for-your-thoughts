@@ -476,11 +476,11 @@ let custom_formatter = Formatter {
 assert_eq!(m.format(&custom_formatter), Ok("1.234.567,89 €".to_string()));
 ```
 
-When building a custom `Formatter` you can specify a formatting template for both positive and negative amounts. The formatted amount will never include a positive/negative sign, even when the amount is negative, so that you can control where the sign appears in the respective format. Or use an alternative accounting representation for negative amounts, where it is wrapped in parentheses.
+When building a custom `Formatter` you can specify a formatting template for both positive and negative amounts. The formatted amount will never include a positive/negative sign, even when the amount is negative, so that you can control where the sign appears in the respective template. Or you can use an alternative accounting representation for negative amounts, where it is wrapped in parentheses.
 
 The formatting templates can use any of the following as replacement tokens:
 
-* `{a}` = The amount formatted according to the other properties (e.g., "1,000.00"). This will never include a positive/negative sign, even when the amount is negative, so that you can control the placement of the sign using the format strings.
+* `{a}` = The amount formatted according to the other properties (e.g., "1,000.00"). This will never include a positive/negative sign, even when the amount is negative, so that you can control the placement of the sign using the templates.
 * `{s}` = The currency symbol (e.g., "$"), or empty if the currency has no symbol.
 * `{c}` = The currency code (e.g., "USD").
 * `{s|c}` = The currency symbol, or the currency code if the currency has no symbol.

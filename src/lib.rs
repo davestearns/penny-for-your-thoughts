@@ -1,3 +1,90 @@
+//! This library implements a `Money` datatype that supports both a
+//! statically-typed and dynamically-typed `Currency`. That is to say,
+//! you can create a `Money<USD>` that is a totally different type than
+//! a `Money<JPY>`, or you can create a `Money<&dyn Currency>` where
+//! the currency is determined at runtime, but still safely do math with
+//! it (i.e., `Money<&dyn Currency> + Money<&dyn Currency>` returns a
+//! fallible `Result` because the currencies might be different).
+//!
+//! For example:
+//! ```rust
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! use rust_decimal::Decimal;
+//! use doubloon::{
+//!     {Money, Currency, MoneyMathError},
+//!     iso_currencies::{USD, JPY, EUR, INR},
+//!     currency_map::CurrencyMap,
+//!     formatter::{Formatter},
+//! };
+//!
+//! // Instances with statically-typed currencies.
+//! let m_usd = Money::new(Decimal::ONE, USD);
+//! let m_jpy = Money::new(Decimal::ONE, JPY);
+//!
+//! // This won't even compile because they are two different types.
+//! // let no_compile = m_usd + m_jpy;
+//!
+//! // But you can add same currencies together.
+//! assert_eq!(
+//!   m_usd + m_usd,
+//!   Money::new(Decimal::TWO, USD)
+//! );
+//!
+//! // If you don't know the currency until runtime, just use a
+//! // dynamically-typed Currency (&dyn Currency).
+//! let currency_map = CurrencyMap::from_collection(vec![&USD as &dyn Currency, &JPY]);
+//! let m_dyn_usd = Money::new(Decimal::ONE, currency_map.get("USD").unwrap());
+//! let m_dyn_jpy = Money::new(Decimal::ONE, currency_map.get("JPY").unwrap());
+//!
+//! // Adding same currencies produces an Ok Result.
+//! assert_eq!(
+//!     m_dyn_usd + m_dyn_usd,
+//!     Ok(Money::new(Decimal::TWO, currency_map.get("USD").unwrap()))
+//! );
+//!
+//! // Adding different currencies produces an Err Result.
+//! assert_eq!(
+//!     m_dyn_usd + m_dyn_jpy,
+//!     Err(MoneyMathError::IncompatibleCurrencies("USD", "JPY"))
+//! );
+//!
+//! // Powerful formatting is included.
+//! assert_eq!(
+//!     Money::new(Decimal::new(123456789, 2), USD).format(&Formatter::default()),
+//!     Ok("$1,234,567.89".to_string())
+//! );
+//!
+//! // By default the decimal is rounded to the currency minor units (JPY has zero).
+//! assert_eq!(
+//!     Money::new(Decimal::new(123456789, 2), JPY).format(&Formatter::default()),
+//!     Ok("¥1,234,568".to_string())
+//! );
+//!
+//! // You can override most things, such as the decimal and
+//! // digit group separators.
+//! let custom_formatter = Formatter {
+//!     decimal_separator: ",",
+//!     digit_group_separator: ".",
+//!     ..Default::default()
+//! };
+//! assert_eq!(
+//!     Money::new(Decimal::new(123456789, 2), EUR).format(&custom_formatter),
+//!     Ok("€1.234.567,89".to_string())
+//! );
+//!
+//! // Or even override the digit grouping pattern.
+//! let custom_digit_grouping = Formatter {
+//!     digit_groupings: Some(&[3,2,2]),
+//!     ..Default::default()
+//! };
+//! assert_eq!(
+//!     Money::new(Decimal::new(123456789, 0), INR).format(&custom_digit_grouping),
+//!     Ok("₹12,34,56,789.00".to_string())
+//! );
+//! # Ok(())
+//! # }
+//! ```
+
 use std::{
     fmt::Display,
     ops::{Add, Div, Mul, Neg, Rem, Sub},
