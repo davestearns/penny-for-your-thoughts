@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/davestearns/penny-for-your-thoughts/actions/workflows/ci.yml/badge.svg)](https://github.com/davestearns/penny-for-your-thoughts/actions/workflows/ci.yml)
 
+**AKA: doubloon**
+
 This library implements a `Money` datatype that supports both a statically-typed and dynamically-typed `Currency`. That is to say, you can create a `Money<USD>` that is a totally different type than a `Money<JPY>`, or you can create a `Money<&dyn Currency>` where the currency is determined at runtime, but still safely do math with it (i.e., `Money<&dyn Currency> + Money<&dyn Currency>` returns a fallible `Result` because the currencies might be different).
 
 My main motivation for building this was to learn more about Rust trait bounds and custom operators. But I was also recently looking for a crate to represent an amount of money in a currency, and I noticed that the most popular one, [rusty_money](https://github.com/varunsrin/rusty_money), hasn't been updated in a while, and has several outstanding issues and pull requests that are more than a year old. It also has a rather un-ergonomic API and set of behaviors: for example, it requires the use of explicit lifetimes (which naturally infect all types that use it), and it simply panics when you do math on instances with different currencies.
@@ -474,9 +476,11 @@ let custom_formatter = Formatter {
 assert_eq!(m.format(&custom_formatter), Ok("1.234.567,89 €".to_string()));
 ```
 
-The templates can use any of the following as replacement tokens:
+When building a custom `Formatter` you can specify a formatting template for both positive and negative amounts. The formatted amount will never include a positive/negative sign, even when the amount is negative, so that you can control where the sign appears in the respective format. Or use an alternative accounting representation for negative amounts, where it is wrapped in parentheses.
 
-* `{a}` = The amount formatted according to the other properties (e.g., "1,000.00").
+The formatting templates can use any of the following as replacement tokens:
+
+* `{a}` = The amount formatted according to the other properties (e.g., "1,000.00"). This will never include a positive/negative sign, even when the amount is negative, so that you can control the placement of the sign using the format strings.
 * `{s}` = The currency symbol (e.g., "$"), or empty if the currency has no symbol.
 * `{c}` = The currency code (e.g., "USD").
 * `{s|c}` = The currency symbol, or the currency code if the currency has no symbol.
