@@ -15,9 +15,11 @@ use crate::Currency;
 /// * `{s|c}` = The currency symbol, or the currency code if the currency
 ///   has no symbol.
 /// * `{s|c_}` = Same as `{s|c}` but when there is no symbol, the code includes a
-///   trailing space to offset it from the amount.
-/// * `{_c|s}` = Same as `{s|c}` but with there is no symbol, the code includes a
-///   leading space to offset it from the amount.
+///   trailing space to offset it from the amount when it appears right before
+///   the amount.
+/// * `{s|_c}` = Same as `{s|c}` but with there is no symbol, the code includes a
+///   leading space to offset it from the amount when it appears right after
+///   the amount.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Formatter {
     /// An explicit number of decimal places to round to and display.
@@ -116,7 +118,7 @@ impl Formatter {
                             Cow::Borrowed(currency.symbol())
                         }
                     }
-                    "_c|s" => {
+                    "s|_c" => {
                         if currency.symbol().is_empty() {
                             Cow::Owned(format!(" {}", currency.code()))
                         } else {
@@ -351,6 +353,21 @@ mod tests {
         assert_eq!(
             Formatter::default().format(Decimal::new(123456789123456789, 0), &XXX),
             Ok("XXX 123,456,789,123,456,789".to_string()),
+        );
+    }
+    #[test]
+    fn format_custom_positive_template() {
+        let f = Formatter {
+            positive_template: "{a}{s|_c}",
+            ..Default::default()
+        };
+        assert_eq!(
+            f.format(Decimal::new(1234, 0), &USD),
+            Ok("1,234.00$".to_string())
+        );
+        assert_eq!(
+            f.format(Decimal::new(1234, 0), &XXX),
+            Ok("1,234 XXX".to_string())
         );
     }
 
