@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use rust_decimal::{Decimal, RoundingStrategy};
 use thiserror::Error;
 
@@ -95,37 +93,43 @@ impl Formatter {
         while let Some(ch) = iter.next() {
             if ch == '{' {
                 let token: String = iter.by_ref().take_while(|c| *c != '}').collect();
-                let resolved = match token.as_str() {
-                    "a" => Cow::Borrowed(formatted_amount.as_str()),
-                    "s" => Cow::Borrowed(currency.symbol()),
-                    "c" => Cow::Borrowed(currency.code()),
+                match token.as_str() {
+                    "a" => {
+                        output.push_str(formatted_amount.as_str());
+                    }
+                    "s" => {
+                        output.push_str(currency.symbol());
+                    }
+                    "c" => {
+                        output.push_str(currency.code());
+                    }
                     "s|c" => {
                         if currency.symbol().is_empty() {
-                            Cow::Borrowed(currency.code())
+                            output.push_str(currency.code());
                         } else {
-                            Cow::Borrowed(currency.symbol())
+                            output.push_str(currency.symbol());
                         }
                     }
                     "s|c_" => {
                         if currency.symbol().is_empty() {
-                            Cow::Owned(format!("{} ", currency.code()))
+                            output.push_str(currency.code());
+                            output.push(' ');
                         } else {
-                            Cow::Borrowed(currency.symbol())
+                            output.push_str(currency.symbol());
                         }
                     }
                     "s|_c" => {
                         if currency.symbol().is_empty() {
-                            Cow::Owned(format!(" {}", currency.code()))
+                            output.push(' ');
+                            output.push_str(currency.code());
                         } else {
-                            Cow::Borrowed(currency.symbol())
+                            output.push_str(currency.symbol());
                         }
                     }
-                    _ => Cow::Borrowed(""),
+                    _ => {
+                        return Err(FormatError::InvalidToken(token));
+                    }
                 };
-                if resolved.is_empty() {
-                    return Err(FormatError::InvalidToken(token));
-                }
-                output.push_str(&resolved);
             } else {
                 output.push(ch)
             }
@@ -419,6 +423,9 @@ mod tests {
             decimal_places: Some(4),
             ..Default::default()
         };
-        assert_eq!(f.format(Decimal::new(123456,4), &USD), Ok("$12.3456".to_string()));
+        assert_eq!(
+            f.format(Decimal::new(123456, 4), &USD),
+            Ok("$12.3456".to_string())
+        );
     }
 }
