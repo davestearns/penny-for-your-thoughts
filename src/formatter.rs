@@ -366,4 +366,27 @@ mod tests {
             Ok("XXX 123,456,789,123,456,789".to_string()),
         );
     }
+
+    #[test]
+    fn format_custom_negative_template() {
+        let m = Money::new(-Decimal::new(123456789123456789, 2), USD);
+        let f = Formatter {
+            negative_template: "({s}{a})",
+            ..Default::default()
+        };
+        assert_eq!(
+            f.format(m.amount, &m.currency),
+            Ok("($1,234,567,891,234,567.89)".to_string())
+        );
+    }
+
+    #[test]
+    fn format_custom_zero_template() {
+        let m = Money::new(Decimal::ZERO, USD);
+        let f = Formatter {
+            zero_template: Some("zero"),
+            ..Default::default()
+        };
+        assert_eq!(f.format(m.amount, &m.currency), Ok("zero".to_string()));
+    }
 }
