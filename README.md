@@ -538,6 +538,37 @@ let f = Formatter {
 assert_eq!(m.format(&f), Ok("free!".to_string()));
 ```
 
+## Serde
+
+The library also has support for [serde](https://serde.rs/) serialization via the optional `serde` feature.
+
+```bash
+cargo add doubloon --features serde
+```
+
+When serializing a Money instance, it will write a struct with two fields: the amount as a string, and the currency code as a string. For example, serializing a `Money::new(Decimal::ONE, USD)` to JSON yields the following:
+
+```json
+{
+    "amount": "1",
+    "code": "USD"
+}
+```
+
+Unfortunately serde deserialization doesn't support any sort of caller-supplied context, so there's no generic way for this library to turn a serialized currency code back into the appropriate `&dyn Currency`. Since callers may implement their own `Currency` instances to support application-specific currencies, there's no single well-known global map the library could use to resolve a currency code.
+
+To support deserialization, your application should deserialize into a struct like this:
+
+```rust
+#[derive(Debug, Deserialize)]
+pub struct DeserializedMoney {
+    pub amount: Decimal,
+    pub code: String,
+}
+```
+
+You can then resolve the `code` to the appropriate `&dyn Currency` and construct a `Money` instance using that.
+
 ## Marker Trait for New
 
 When we first saw the `Money::new()` method, I noted that it technically allows one to construct a `Money` with something that isn't actually a `Currency`. At first I tried to work around this by putting `new()` into the specific `impl` blocks like so, but this doesn't compile:
