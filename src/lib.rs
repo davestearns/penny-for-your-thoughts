@@ -94,6 +94,9 @@ use formatter::{FormatError, Formatter};
 use rust_decimal::{Decimal, MathematicalOps};
 use thiserror::Error;
 
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeStruct, Serialize};
+
 /// Strategies for use with the [Money::round] method.
 pub use rust_decimal::RoundingStrategy;
 
@@ -481,6 +484,38 @@ impl<'c> PartialOrd for Money<&'c dyn Currency> {
     }
 }
 
+#[cfg(feature = "serde")]
+impl<C> Serialize for Money<C>
+where
+    C: Currency,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut struct_serializer = serializer.serialize_struct("money", 2)?;
+        struct_serializer.serialize_field("amount", &self.amount.to_string())?;
+        struct_serializer.serialize_field("currency", &self.currency.code())?;
+        struct_serializer.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'c> Serialize for Money<&'c dyn Currency> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut struct_serializer = serializer.serialize_struct("money", 2)?;
+        struct_serializer.serialize_field("amount", &self.amount.to_string())?;
+        struct_serializer.serialize_field("currency", &self.currency.code())?;
+        struct_serializer.end()
+    }
+}
+
+/// [Display::fmt] is supposed to be infallible, so this just writes the amount
+/// followed by the currency code. For more sophisticated formatting, use the
+/// [Money::format] method, which may return an Err result.
 impl<C> Display for Money<C>
 where
     C: Currency,
@@ -1009,5 +1044,16 @@ mod tests {
             Money::new(Decimal::ONE_THOUSAND, &USD as &dyn Currency).to_string(),
             "1000 USD"
         );
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn serialize() {
+        let expected = "{\"amount\":\"1\",\"currency\":\"USD\"}".to_string();
+        let json = serde_json::to_string(&Money::new(Decimal::ONE, USD)).unwrap();
+        assert_eq!(json, expected);
+
+        let json = serde_json::to_string(&Money::new(Decimal::ONE, &USD as &dyn Currency)).unwrap();
+        assert_eq!(json, expected);
     }
 }
