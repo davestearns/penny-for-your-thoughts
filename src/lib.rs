@@ -1133,4 +1133,19 @@ mod tests {
         let m = Money::new(Decimal::new(123456789, 2), CURRENCIES.get("USD").unwrap());
         assert_eq!(m.format(locale!("en-US")), "$1,234,567.89");
     }
+
+    #[cfg(feature = "formatting")]
+    #[test]
+    fn format_zero_decimals_with_minor_units() {
+        let m = Money::new(Decimal::ONE, USD);
+        assert_eq!(m.format(locale!("en-US")), "$1.00");
+    }
+
+    #[cfg(feature = "formatting")]
+    #[test]
+    fn format_zero_decimals_with_no_minor_units() {
+        let m = Money::new(Decimal::ONE, JPY);
+        // JPY has no minor units, so it shouldn't have any decimals
+        assert_eq!(m.format(locale!("jp-JP")), "¥1");
+    }
 }
