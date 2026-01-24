@@ -15,7 +15,6 @@
 //!     iso_currencies::{USD, JPY, EUR},
 //!     currency_map::CurrencyMap,
 //! };
-//! use icu::locale::locale;
 //!
 //! // Instances with statically-typed currencies.
 //! let m_usd = Money::new(Decimal::ONE, USD);
@@ -48,46 +47,53 @@
 //!     Err(MoneyMathError::IncompatibleCurrencies("USD", "JPY"))
 //! );
 //!
-//! // Powerful locale-aware formatting is provided via the icu crate.
+//! // Powerful locale-aware formatting is provided via the icu crate
+//! // when the "formatting" feature of this crate is enabled.
+//! # #[cfg(feature = "formatting")]
+//! use icu::locale::locale;
 //! let m = Money::new(Decimal::new(123456789, 2), EUR);
 //! // en-US uses comma for group separator, period for decimal separator,
 //! // with the symbol at the left with no spacing.
+//! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(locale!("en-US")), "€1,234,567.89");
 //!
 //! // ir-IR is like en-US except there is a narrow non-breaking space between the symbol
 //! // and the amount.
+//! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(locale!("ir-IR")), "€\u{a0}1,234,567.89");
 //!
 //! // tr-TR is similar to ir-IR but uses period for the group separator
 //! // and comma for the decimal separator.
+//! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(locale!("tr-TR")), "€1.234.567,89");
 //!
 //! // fr-FR puts the symbol at the end, and uses non-breaking spaces between digit groups,
 //! // comma as a decimal separator, and a narrow non-breaking space between the amount and symbol.
+//! # #[cfg(feature = "formatting")]
 //! assert_eq!(
 //!     m.format(locale!("fr-FR")),
 //!     "1\u{202f}234\u{202f}567,89\u{a0}€"
 //! );
 //!
-//! // pl-PL is like fr-FR except it uses all narrow non-breaking spaces.
-//! assert_eq!(m.format(locale!("pl-PL")), "1\u{a0}234\u{a0}567,89\u{a0}€");
-//!
 //! # Ok(())
 //! # }
 //! ```
 
-use std::{
-    fmt::Display,
-    ops::{Add, Div, Mul, Neg, Rem, Sub},
-    str::FromStr,
-};
-
+#[cfg(feature = "formatting")]
 use icu::{
     experimental::dimension::currency::{
         formatter::CurrencyFormatter, options::CurrencyFormatterOptions, CurrencyCode,
     },
     locale::Locale,
 };
+#[cfg(feature = "formatting")]
+use tinystr::TinyAsciiStr;
+
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Neg, Rem, Sub},
+};
+
 use rust_decimal::{Decimal, MathematicalOps};
 use thiserror::Error;
 
@@ -96,7 +102,6 @@ use serde::{ser::SerializeStruct, Serialize};
 
 /// Strategies for use with the [Money::round] method.
 pub use rust_decimal::RoundingStrategy;
-use tinystr::TinyAsciiStr;
 
 pub mod currency_map;
 pub mod iso_currencies;
@@ -221,6 +226,7 @@ where
         }
     }
 
+    #[cfg(feature = "formatting")]
     /// Returns a formatted version of this instance for the specified locale.
     fn format_helper(
         &self,
@@ -270,6 +276,7 @@ where
         self.currency
     }
 
+    #[cfg(feature = "formatting")]
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
@@ -287,6 +294,7 @@ impl<'c> Money<&'c dyn Currency> {
         self.currency
     }
 
+    #[cfg(feature = "formatting")]
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
@@ -553,10 +561,14 @@ mod tests {
     use std::sync::LazyLock;
 
     use super::*;
-    use crate::iso_currencies::{EUR, JPY, PLN, USD};
+    use crate::iso_currencies::{JPY, USD};
     use currency_map::CurrencyMap;
-    use icu::locale::locale;
     use rust_decimal::Decimal;
+
+    #[cfg(feature = "formatting")]
+    use crate::iso_currencies::{EUR, PLN};
+    #[cfg(feature = "formatting")]
+    use icu::locale::locale;
 
     const CURRENCIES: LazyLock<CurrencyMap> =
         LazyLock::new(|| CurrencyMap::from_collection([&USD as &dyn Currency, &JPY]));
@@ -1075,6 +1087,7 @@ mod tests {
         assert_eq!(json, expected);
     }
 
+    #[cfg(feature = "formatting")]
     #[test]
     fn locales_aware_formatting() {
         let m = Money::new(Decimal::new(123456789, 2), EUR);
@@ -1101,6 +1114,7 @@ mod tests {
         assert_eq!(m.format(locale!("pl-PL")), "1\u{a0}234\u{a0}567,89\u{a0}€");
     }
 
+    #[cfg(feature = "formatting")]
     #[test]
     fn format_pln() {
         // For my friend https://github.com/CodeServant
@@ -1111,6 +1125,7 @@ mod tests {
         assert_eq!(m.format(locale!("en-US")), "PLN\u{a0}1,234,567.89");
     }
 
+    #[cfg(feature = "formatting")]
     #[test]
     fn format_dyn_currency() {
         let m = Money::new(Decimal::new(123456789, 2), CURRENCIES.get("USD").unwrap());
