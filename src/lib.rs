@@ -281,7 +281,7 @@ where
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
         let currency_code = CurrencyCode(
-            TinyAsciiStr::from_str(self.currency.code()).expect("unsupported currency code"),
+            TinyAsciiStr::from(self.currency.code()).expect("unsupported currency code"),
         );
         self.format_helper(locale, currency_code, self.currency.minor_units())
     }
@@ -299,7 +299,7 @@ impl<'c> Money<&'c dyn Currency> {
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
         let currency_code = CurrencyCode(
-            TinyAsciiStr::from_str(self.currency.code()).expect("unsupported currency code"),
+            TinyAsciiStr::from(self.currency.code()).expect("unsupported currency code"),
         );
         self.format_helper(locale, currency_code, self.currency.minor_units())
     }
