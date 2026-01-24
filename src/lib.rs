@@ -123,7 +123,7 @@ pub trait Currency {
 
 /// Debug output for a dynamically-typed Currency.
 /// Only prints the code since that is unique.
-impl<'c> std::fmt::Debug for &'c dyn Currency {
+impl std::fmt::Debug for &dyn Currency {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Currency")
             .field("code", &self.code())
@@ -133,7 +133,7 @@ impl<'c> std::fmt::Debug for &'c dyn Currency {
 
 /// Allows comparing dynamically-typed Currency instances.
 /// They are equal of their `code()` methods return the same value.
-impl<'c> PartialEq for &'c dyn Currency {
+impl PartialEq for &dyn Currency {
     fn eq(&self, other: &Self) -> bool {
         self.code() == other.code()
     }
@@ -156,7 +156,7 @@ where
 }
 
 /// Blanket implementation of [MinorUnits] for an `&dyn Currency`.
-impl<'c> MinorUnits for &'c dyn Currency {
+impl MinorUnits for &dyn Currency {
     fn minor_units(&self) -> u32 {
         (*self).minor_units()
     }
@@ -290,9 +290,9 @@ where
 }
 
 /// Functions specifically for borrowed dynamically-typed currencies.
-impl<'c> Money<&'c dyn Currency> {
+impl Money<&dyn Currency> {
     /// Returns the reference to the dynamically-typed Currency.
-    pub fn currency(&self) -> &'c dyn Currency {
+    pub fn currency(&self) -> &dyn Currency {
         self.currency
     }
 
@@ -322,18 +322,18 @@ where
 /// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies and those with statically-typed currencies. Both the amounts
 /// and the currency codes must match.
-impl<'c, C> PartialEq<Money<&'c dyn Currency>> for Money<C>
+impl<C> PartialEq<Money<&dyn Currency>> for Money<C>
 where
     C: Currency + PartialEq,
 {
-    fn eq(&self, other: &Money<&'c dyn Currency>) -> bool {
+    fn eq(&self, other: &Money<&dyn Currency>) -> bool {
         self.amount == other.amount && self.currency.code() == other.currency.code()
     }
 }
 
 /// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies. Both the amounts and currency codes must match.
-impl<'c> PartialEq for Money<&'c dyn Currency> {
+impl PartialEq for Money<&dyn Currency> {
     fn eq(&self, other: &Self) -> bool {
         self.amount == other.amount && self.currency.code() == other.currency.code()
     }
@@ -342,7 +342,7 @@ impl<'c> PartialEq for Money<&'c dyn Currency> {
 /// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies and those with statically-typed currencies. Both the amounts
 /// and currency codes must match.
-impl<'c, C> PartialEq<Money<C>> for Money<&'c dyn Currency>
+impl<C> PartialEq<Money<C>> for Money<&dyn Currency>
 where
     C: Currency,
 {
@@ -379,7 +379,7 @@ macro_rules! impl_binary_op {
         /// Supports $trait for two Money instances with dynamically-typed currencies.
         /// The Output is a Result instead of a Money since the operation
         /// can fail if the currencies are incompatible.
-        impl<'c> $trait for Money<&'c dyn Currency> {
+        impl $trait for Money<&dyn Currency> {
             type Output = Result<Self, MoneyMathError>;
 
             fn $method(self, rhs: Self) -> Self::Output {
@@ -401,7 +401,7 @@ macro_rules! impl_binary_op {
         /// and a Money instance with a statically-typed Currency. The Output
         /// is a Result since the operation can fail if the currencies are
         /// incompatible.
-        impl<'c, C> $trait<Money<C>> for Money<&'c dyn Currency>
+        impl<C> $trait<Money<C>> for Money<&dyn Currency>
         where
             C: Currency,
         {
@@ -426,13 +426,13 @@ macro_rules! impl_binary_op {
         /// and a Money instance with a dynamically-typed Currency. The output
         /// is a Result since the operation can fail if the currencies are
         /// incompatible.
-        impl<'c, C> $trait<Money<&'c dyn Currency>> for Money<C>
+        impl<C> $trait<Money<&dyn Currency>> for Money<C>
         where
             C: Currency,
         {
             type Output = Result<Self, MoneyMathError>;
 
-            fn $method(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
+            fn $method(self, rhs: Money<&dyn Currency>) -> Self::Output {
                 if self.currency.code() == rhs.currency.code() {
                     Ok(Self {
                         amount: self.amount.$method(rhs.amount),
@@ -473,7 +473,7 @@ macro_rules! impl_unary_op {
         }
 
         /// Supports $trait for Money instances with dynamically-typed currencies.
-        impl<'c> $trait for Money<&'c dyn Currency> {
+        impl $trait for Money<&dyn Currency> {
             type Output = Self;
 
             fn $method(self) -> Self::Output {
@@ -501,7 +501,7 @@ where
 
 /// Allows ordering comparisons for Money instances with
 /// dynamically-typed currencies.
-impl<'c> PartialOrd for Money<&'c dyn Currency> {
+impl PartialOrd for Money<&dyn Currency> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         if self.currency.code() == other.currency.code() {
             self.amount.partial_cmp(&other.amount)
@@ -528,7 +528,7 @@ where
 }
 
 #[cfg(feature = "serde")]
-impl<'c> Serialize for Money<&'c dyn Currency> {
+impl Serialize for Money<&dyn Currency> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -552,7 +552,7 @@ where
     }
 }
 
-impl<'c> Display for Money<&'c dyn Currency> {
+impl Display for Money<&dyn Currency> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {}", self.amount, self.currency.code())
     }
