@@ -1,6 +1,6 @@
 [package]
 name = "doubloon"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2021"
 license = "MIT"
 description = "Money datatype that supports both statically and dynamically typed currencies"
@@ -9,9 +9,11 @@ keywords = ["money", "currency"]
 categories = ["data-structures"]
 
 [dependencies]
+icu = { version = "2.1.1", features = ["experimental"] }
 rust_decimal = { version = "1.35.0", features = ["maths"] }
 serde = { version = "1.0.206", optional = true }
 thiserror = "1.0.63"
+tinystr = "0.8.2"
 
 [features]
 serde = ["dep:serde"]
