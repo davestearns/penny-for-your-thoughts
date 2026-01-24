@@ -1146,6 +1146,6 @@ mod tests {
     fn format_zero_decimals_with_no_minor_units() {
         let m = Money::new(Decimal::ONE, JPY);
         // JPY has no minor units, so it shouldn't have any decimals
-        assert_eq!(m.format(locale!("jp-JP")), "¥1");
+        assert_eq!(m.format(locale!("ja-JP")), "￥1");
     }
 }
