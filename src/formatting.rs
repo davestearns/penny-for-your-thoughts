@@ -12,8 +12,16 @@ use crate::{Currency, Money};
 
 #[derive(Debug, Clone)]
 pub struct FormattingOptions {
+    /// The number of decimal places to include in the formatted string.
+    /// By default this will be the number of minor units for the currency.
+    /// If this is less than the current scale, the amount will be rounded
+    /// using the specified rounding_strategy.
     pub decimal_places: u32,
+    /// The rounding strategy to use when decimal_places is less than
+    /// the current scale. By default this will use MidpointNearestEven,
+    /// otherwise known as "banker's rounding."
     pub rounding_strategy: RoundingStrategy,
+    /// Options for the icu [CurrencyFormatter].
     pub currency_formatter_options: CurrencyFormatterOptions,
 }
 
