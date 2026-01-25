@@ -10,14 +10,27 @@ use tinystr::TinyAsciiStr;
 
 use crate::{Currency, Money};
 
+#[derive(Debug, Clone)]
+pub struct FormattingOptions {
+    pub decimal_places: u32,
+    pub rounding_strategy: RoundingStrategy,
+    pub currency_formatter_options: CurrencyFormatterOptions,
+}
+
 impl<C> Money<C> {
     /// Returns a formatted version of this instance for the specified locale.
     fn format_helper(
         &self,
         locale: Locale,
-        currency_code: CurrencyCode,
+        currency_code_str: &'static str,
         decimal_places: u32,
     ) -> String {
+        // This could only fail for app-defined Currency instances that
+        // return a code with non-ASCII characters, and it fail immediately
+        // and always, so I think it's fine to use .expect() here.
+        let currency_code = CurrencyCode(
+            TinyAsciiStr::from_str(currency_code_str).expect("unsupported currency code"),
+        );
         let formatter =
             CurrencyFormatter::try_new(locale.into(), CurrencyFormatterOptions::default()).unwrap();
 
@@ -43,10 +56,7 @@ where
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
-        let currency_code = CurrencyCode(
-            TinyAsciiStr::from_str(self.currency.code()).expect("unsupported currency code"),
-        );
-        self.format_helper(locale, currency_code, self.currency.minor_units())
+        self.format_helper(locale, self.currency.code(), self.currency.minor_units())
     }
 }
 
@@ -56,10 +66,7 @@ impl Money<&dyn Currency> {
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
-        let currency_code = CurrencyCode(
-            TinyAsciiStr::from_str(self.currency.code()).expect("unsupported currency code"),
-        );
-        self.format_helper(locale, currency_code, self.currency.minor_units())
+        self.format_helper(locale, self.currency.code(), self.currency.minor_units())
     }
 }
 
