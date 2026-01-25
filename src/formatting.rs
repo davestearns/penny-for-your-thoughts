@@ -23,7 +23,7 @@ impl<C> Money<C> {
         &self,
         locale: Locale,
         currency_code_str: &'static str,
-        decimal_places: u32,
+        options: FormattingOptions,
     ) -> String {
         // This could only fail for app-defined Currency instances that
         // return a code with non-ASCII characters, and it fail immediately
@@ -36,9 +36,9 @@ impl<C> Money<C> {
 
         let mut rounded_amount = self
             .amount
-            .round_dp_with_strategy(decimal_places, RoundingStrategy::MidpointNearestEven);
+            .round_dp_with_strategy(options.decimal_places, options.rounding_strategy);
         // rescale to force a minimum number of decimal places even when zero
-        rounded_amount.rescale(decimal_places);
+        rounded_amount.rescale(options.decimal_places);
         let amount_string = rounded_amount.to_string();
         let amount = icu::decimal::input::Decimal::try_from_str(&amount_string).unwrap();
 
@@ -56,7 +56,20 @@ where
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
-        self.format_helper(locale, self.currency.code(), self.currency.minor_units())
+        self.format_helper(
+            locale,
+            self.currency.code(),
+            FormattingOptions {
+                decimal_places: self.currency.minor_units(),
+                rounding_strategy: RoundingStrategy::MidpointNearestEven,
+                currency_formatter_options: CurrencyFormatterOptions::default(),
+            },
+        )
+    }
+
+    /// Same as [format] but allows the caller to specify [FormattingOptions].
+    pub fn format_with_options(&self, locale: Locale, options: FormattingOptions) -> String {
+        self.format_helper(locale, self.currency.code(), options)
     }
 }
 
@@ -66,14 +79,29 @@ impl Money<&dyn Currency> {
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: Locale) -> String {
-        self.format_helper(locale, self.currency.code(), self.currency.minor_units())
+        self.format_helper(
+            locale,
+            self.currency.code(),
+            FormattingOptions {
+                decimal_places: self.currency.minor_units(),
+                rounding_strategy: RoundingStrategy::MidpointNearestEven,
+                currency_formatter_options: CurrencyFormatterOptions::default(),
+            },
+        )
+    }
+
+    /// Same as [format] but allows the caller to specify [FormattingOptions].
+    pub fn format_with_options(&self, locale: Locale, options: FormattingOptions) -> String {
+        self.format_helper(locale, self.currency.code(), options)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::formatting::*;
     use crate::iso_currencies::{EUR, JPY, PLN, USD};
     use crate::*;
+    use icu::experimental::dimension::currency::options::CurrencyFormatterOptions;
     use icu::locale::locale;
 
     #[test]
@@ -144,6 +172,50 @@ mod tests {
         assert_eq!(
             m.format(locale!("pl-PL")),
             "1\u{a0}234\u{a0}567,89\u{a0}USD"
+        );
+    }
+
+    #[test]
+    fn format_with_options() {
+        let m = Money::new(Decimal::ONE_HUNDRED, USD);
+        assert_eq!(
+            m.format_with_options(
+                locale!("en-US"),
+                FormattingOptions {
+                    decimal_places: 0, // force zero decimal places
+                    rounding_strategy: RoundingStrategy::MidpointNearestEven,
+                    currency_formatter_options: CurrencyFormatterOptions::default(),
+                }
+            ),
+            "$100"
+        );
+    }
+
+    #[test]
+    fn format_rounding() {
+        let m = Money::new(Decimal::new(123456750, 2), USD);
+        assert_eq!(
+            m.format_with_options(
+                locale!("en-US"),
+                FormattingOptions {
+                    decimal_places: 0, // force zero decimal places
+                    rounding_strategy: RoundingStrategy::MidpointNearestEven,
+                    currency_formatter_options: CurrencyFormatterOptions::default(),
+                }
+            ),
+            "$1,234,568" // should round to nearest even
+        );
+
+        assert_eq!(
+            m.format_with_options(
+                locale!("en-US"),
+                FormattingOptions {
+                    decimal_places: 0, // force zero decimal places
+                    rounding_strategy: RoundingStrategy::MidpointTowardZero,
+                    currency_formatter_options: CurrencyFormatterOptions::default(),
+                }
+            ),
+            "$1,234,567" // should round toward zero
         );
     }
 }
