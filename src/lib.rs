@@ -47,7 +47,7 @@
 //!     Err(MoneyMathError::IncompatibleCurrencies("USD", "JPY"))
 //! );
 //!
-//! // Powerful locale-aware formatting is provided via the icu crate
+//! // Locale-aware formatting is provided via the icu crate
 //! // when the "formatting" feature of this crate is enabled.
 //! # #[cfg(feature = "formatting")]
 //! use icu::locale::locale;
@@ -57,8 +57,8 @@
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(locale!("en-US")), "€1,234,567.89");
 //!
-//! // ir-IR is like en-US except there is a narrow non-breaking space between the symbol
-//! // and the amount.
+//! // ir-IR is like en-US except there is a narrow non-breaking space
+//! // between the symbol and the amount.
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(locale!("ir-IR")), "€\u{a0}1,234,567.89");
 //!
@@ -67,8 +67,9 @@
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(locale!("tr-TR")), "€1.234.567,89");
 //!
-//! // fr-FR puts the symbol at the end, and uses non-breaking spaces between digit groups,
-//! // comma as a decimal separator, and a narrow non-breaking space between the amount and symbol.
+//! // fr-FR puts the symbol at the end, and uses non-breaking spaces
+//! // between digit groups, comma as a decimal separator,
+//! // and a narrow non-breaking space between the amount and symbol.
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(
 //!     m.format(locale!("fr-FR")),

@@ -70,7 +70,7 @@ mod tests {
     use icu::locale::locale;
 
     #[test]
-    fn locales_aware_formatting() {
+    fn locale_aware_formatting() {
         let m = Money::new(Decimal::new(123456789, 2), EUR);
         // en-US uses comma for group separator, period for decimal separator,
         // with the symbol at the left with no spacing.
@@ -123,5 +123,20 @@ mod tests {
         let m = Money::new(Decimal::ONE, JPY);
         // JPY has no minor units, so it shouldn't have any decimals
         assert_eq!(m.format(locale!("ja-JP")), "￥1");
+    }
+
+    #[test]
+    fn format_foreign_currency_in_euro_locales() {
+        let m = Money::new(Decimal::new(123456789, 2), USD);
+        assert_eq!(m.format(locale!("en-US")), "$1,234,567.89");
+        assert_eq!(
+            m.format(locale!("fr-FR")),
+            "1\u{202f}234\u{202f}567,89\u{a0}$US"
+        );
+        assert_eq!(m.format(locale!("tr-TR")), "$1.234.567,89");
+        assert_eq!(
+            m.format(locale!("pl-PL")),
+            "1\u{a0}234\u{a0}567,89\u{a0}USD"
+        );
     }
 }
