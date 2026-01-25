@@ -79,6 +79,33 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! ## Installation
+//! ```bash
+//! cargo add doubloon
+//! ```
+//!
+//! To enable formatting and/or serde support,
+//! enable the "formatting" and/or "serde" features.
+//!
+//! ```bash
+//! cargo add doubloon --features "serde,formatting"
+//! ```
+//!
+//! The serde feature enables serialization to a struct
+//! with separate fields for the amount and currency,
+//! suitable for storing in a database or sending to
+//! another service or client.
+//!
+//! Because applications can define their own `Currency`
+//! implementations, there's no global map one can use
+//! to deserialize a currency code back into a `Currency`
+//! instance, so deserialization is a two-step process.
+//! First deserialize into a struct with a `Decimal` and
+//! `String` field. Then use the currency code string
+//! to resolve and construct the appropriate `Currency`
+//! instance, and pass that as well as the `Decimal` to
+//! `Money::new()`.
 
 use std::{
     fmt::Display,
