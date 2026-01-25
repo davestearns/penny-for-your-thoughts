@@ -816,14 +816,6 @@ where
 
 This makes the marker trait a bit more useful and perhaps worth it.
 
-## TODO
-
-I still need to finish the following:
-
-- **Helper Methods:** Might be useful to add various helpers, such as `split()`
-  for minor-unit aware splitting (e.g., remainder pennies gets assigned to a
-  subset of the buckets).
-
 ## Corrections or Suggestions?
 
 Is there a better way to do this? I'm fairly new to Rust, so perhaps there's a
