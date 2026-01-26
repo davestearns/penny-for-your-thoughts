@@ -55,24 +55,24 @@
 //! // en-US uses comma for group separator, period for decimal separator,
 //! // with the symbol at the left with no spacing.
 //! # #[cfg(feature = "formatting")]
-//! assert_eq!(m.format(locale!("en-US")), "€1,234,567.89");
+//! assert_eq!(m.format(&locale!("en-US")), "€1,234,567.89");
 //!
 //! // ir-IR is like en-US except there is a narrow non-breaking space
 //! // between the symbol and the amount.
 //! # #[cfg(feature = "formatting")]
-//! assert_eq!(m.format(locale!("ir-IR")), "€\u{a0}1,234,567.89");
+//! assert_eq!(m.format(&locale!("ir-IR")), "€\u{a0}1,234,567.89");
 //!
 //! // tr-TR is similar to ir-IR but uses period for the group separator
 //! // and comma for the decimal separator.
 //! # #[cfg(feature = "formatting")]
-//! assert_eq!(m.format(locale!("tr-TR")), "€1.234.567,89");
+//! assert_eq!(m.format(&locale!("tr-TR")), "€1.234.567,89");
 //!
 //! // fr-FR puts the symbol at the end, and uses non-breaking spaces
 //! // between digit groups, comma as a decimal separator,
 //! // and a narrow non-breaking space between the amount and symbol.
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(
-//!     m.format(locale!("fr-FR")),
+//!     m.format(&locale!("fr-FR")),
 //!     "1\u{202f}234\u{202f}567,89\u{a0}€"
 //! );
 //!
