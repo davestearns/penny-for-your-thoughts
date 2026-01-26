@@ -1,7 +1,5 @@
 use icu::{
-    experimental::dimension::currency::{
-        formatter::CurrencyFormatter, options::CurrencyFormatterOptions, CurrencyCode,
-    },
+    experimental::dimension::currency::{formatter::CurrencyFormatter, CurrencyCode},
     locale::Locale,
 };
 use rust_decimal::RoundingStrategy;
@@ -9,6 +7,12 @@ use std::str::FromStr;
 use tinystr::TinyAsciiStr;
 
 use crate::{Currency, Money};
+
+/// Republished reference to the icu crate's CurrencyFormatterOptions.
+/// If you `use doubloon::formatting::CurrencyFormatterOptions`, your
+/// code will be protected against changes to module path within the icu
+/// crate once currency formatting becomes stable.
+pub use icu::experimental::dimension::currency::options::CurrencyFormatterOptions;
 
 #[derive(Debug, Clone)]
 pub struct FormattingOptions {
@@ -109,7 +113,6 @@ mod tests {
     use crate::formatting::*;
     use crate::iso_currencies::{EUR, JPY, PLN, USD};
     use crate::*;
-    use icu::experimental::dimension::currency::options::CurrencyFormatterOptions;
     use icu::locale::locale;
 
     #[test]
@@ -143,7 +146,10 @@ mod tests {
         // For my friend https://github.com/CodeServant
         let m = Money::new(Decimal::new(123456789, 2), PLN);
         // in pl-PL the symbol is zł, on the right
-        assert_eq!(m.format(&locale!("pl-PL")), "1\u{a0}234\u{a0}567,89\u{a0}zł");
+        assert_eq!(
+            m.format(&locale!("pl-PL")),
+            "1\u{a0}234\u{a0}567,89\u{a0}zł"
+        );
         // in en-US the ISO code is used instead, on the left
         assert_eq!(m.format(&locale!("en-US")), "PLN\u{a0}1,234,567.89");
     }
@@ -225,5 +231,11 @@ mod tests {
             ),
             "$1,234,567" // should round toward zero
         );
+    }
+
+    #[test]
+    fn format_negative() {
+        let m = Money::new(Decimal::new(-123456789, 2), USD);
+        assert_eq!(m.format(&locale!("en-US")), "$-1,234,567.89");
     }
 }
