@@ -12,9 +12,8 @@
 //! use rust_decimal::Decimal;
 //! use doubloon::{
 //!     {Money, Currency, MoneyMathError},
-//!     iso_currencies::{USD, JPY, EUR, INR},
+//!     iso_currencies::{USD, JPY, EUR},
 //!     currency_map::CurrencyMap,
-//!     formatter::{Formatter},
 //! };
 //!
 //! // Instances with statically-typed currencies.
@@ -48,49 +47,71 @@
 //!     Err(MoneyMathError::IncompatibleCurrencies("USD", "JPY"))
 //! );
 //!
-//! // Powerful formatting is included.
+//! // Locale-aware formatting is provided via the icu crate
+//! // when the "formatting" feature of this crate is enabled.
+//! # #[cfg(feature = "formatting")]
+//! use icu::locale::locale;
+//! let m = Money::new(Decimal::new(123456789, 2), EUR);
+//! // en-US uses comma for group separator, period for decimal separator,
+//! // with the symbol at the left with no spacing.
+//! # #[cfg(feature = "formatting")]
+//! assert_eq!(m.format(&locale!("en-US")), "€1,234,567.89");
+//!
+//! // ir-IR is like en-US except there is a narrow non-breaking space
+//! // between the symbol and the amount.
+//! # #[cfg(feature = "formatting")]
+//! assert_eq!(m.format(&locale!("ir-IR")), "€\u{a0}1,234,567.89");
+//!
+//! // tr-TR is similar to ir-IR but uses period for the group separator
+//! // and comma for the decimal separator.
+//! # #[cfg(feature = "formatting")]
+//! assert_eq!(m.format(&locale!("tr-TR")), "€1.234.567,89");
+//!
+//! // fr-FR puts the symbol at the end, and uses non-breaking spaces
+//! // between digit groups, comma as a decimal separator,
+//! // and a narrow non-breaking space between the amount and symbol.
+//! # #[cfg(feature = "formatting")]
 //! assert_eq!(
-//!     Money::new(Decimal::new(123456789, 2), USD).format(&Formatter::default()),
-//!     Ok("$1,234,567.89".to_string())
+//!     m.format(&locale!("fr-FR")),
+//!     "1\u{202f}234\u{202f}567,89\u{a0}€"
 //! );
 //!
-//! // By default the decimal is rounded to the currency minor units (JPY has zero).
-//! assert_eq!(
-//!     Money::new(Decimal::new(123456789, 2), JPY).format(&Formatter::default()),
-//!     Ok("¥1,234,568".to_string())
-//! );
-//!
-//! // You can override most things, such as the decimal and
-//! // digit group separators.
-//! let custom_formatter = Formatter {
-//!     decimal_separator: ",",
-//!     digit_group_separator: ".",
-//!     ..Default::default()
-//! };
-//! assert_eq!(
-//!     Money::new(Decimal::new(123456789, 2), EUR).format(&custom_formatter),
-//!     Ok("€1.234.567,89".to_string())
-//! );
-//!
-//! // Or even override the digit grouping pattern.
-//! let custom_digit_grouping = Formatter {
-//!     digit_groupings: Some(&[3,2,2]),
-//!     ..Default::default()
-//! };
-//! assert_eq!(
-//!     Money::new(Decimal::new(123456789, 0), INR).format(&custom_digit_grouping),
-//!     Ok("₹12,34,56,789.00".to_string())
-//! );
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! ## Installation
+//! ```bash
+//! cargo add doubloon
+//! ```
+//!
+//! To enable formatting and/or serde support,
+//! enable the "formatting" and/or "serde" features.
+//!
+//! ```bash
+//! cargo add doubloon --features "serde,formatting"
+//! ```
+//!
+//! The serde feature enables serialization to a struct
+//! with separate fields for the amount and currency,
+//! suitable for storing in a database or sending to
+//! another service or client.
+//!
+//! Because applications can define their own `Currency`
+//! implementations, there's no global map one can use
+//! to deserialize a currency code back into a `Currency`
+//! instance, so deserialization is a two-step process.
+//! First deserialize into a struct with a `Decimal` and
+//! `String` field. Then use the currency code string
+//! to resolve and construct the appropriate `Currency`
+//! instance, and pass that as well as the `Decimal` to
+//! `Money::new()`.
 
 use std::{
     fmt::Display,
     ops::{Add, Div, Mul, Neg, Rem, Sub},
 };
 
-use formatter::{FormatError, Formatter};
 use rust_decimal::{Decimal, MathematicalOps};
 use thiserror::Error;
 
@@ -101,8 +122,10 @@ use serde::{ser::SerializeStruct, Serialize};
 pub use rust_decimal::RoundingStrategy;
 
 pub mod currency_map;
-pub mod formatter;
 pub mod iso_currencies;
+
+#[cfg(feature = "formatting")]
+pub mod formatting;
 
 /// Common trait for all currencies.
 pub trait Currency {
@@ -113,21 +136,13 @@ pub trait Currency {
     /// Currencies like USD and EUR currently support 2, but others
     /// like JPY or KRW support zero.
     fn minor_units(&self) -> u32;
-    /// Returns the symbol used to represent this currency.
-    /// For example `$` for USD or `¥` for JPY. Some currencies
-    /// use a series of letters instead of a special symbol
-    /// (e.g., `CHF` or `Lek`). If the currency has no defined
-    /// symbol, this will return an empty string.
-    fn symbol(&self) -> &'static str;
-    /// Returns the informal name for this currency.
-    fn name(&self) -> &'static str;
     /// Returns the unique ISO numeric code for this currency.
     fn numeric_code(&self) -> u32;
 }
 
 /// Debug output for a dynamically-typed Currency.
 /// Only prints the code since that is unique.
-impl<'c> std::fmt::Debug for &'c dyn Currency {
+impl std::fmt::Debug for &dyn Currency {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Currency")
             .field("code", &self.code())
@@ -137,7 +152,7 @@ impl<'c> std::fmt::Debug for &'c dyn Currency {
 
 /// Allows comparing dynamically-typed Currency instances.
 /// They are equal of their `code()` methods return the same value.
-impl<'c> PartialEq for &'c dyn Currency {
+impl PartialEq for &dyn Currency {
     fn eq(&self, other: &Self) -> bool {
         self.code() == other.code()
     }
@@ -160,7 +175,7 @@ where
 }
 
 /// Blanket implementation of [MinorUnits] for an `&dyn Currency`.
-impl<'c> MinorUnits for &'c dyn Currency {
+impl MinorUnits for &dyn Currency {
     fn minor_units(&self) -> u32 {
         (*self).minor_units()
     }
@@ -258,25 +273,13 @@ where
     pub fn currency(&self) -> C {
         self.currency
     }
-
-    /// Returns a formatted version of this instance using the
-    /// supplied [Formatter].
-    pub fn format(&self, formatter: &Formatter) -> Result<String, FormatError> {
-        formatter.format(self.amount, &self.currency)
-    }
 }
 
 /// Functions specifically for borrowed dynamically-typed currencies.
-impl<'c> Money<&'c dyn Currency> {
+impl Money<&dyn Currency> {
     /// Returns the reference to the dynamically-typed Currency.
-    pub fn currency(&self) -> &'c dyn Currency {
+    pub fn currency(&self) -> &dyn Currency {
         self.currency
-    }
-
-    /// Returns a formatted version of this instance using the
-    /// supplied [Formatter].
-    pub fn format(&self, formatter: &Formatter) -> Result<String, FormatError> {
-        formatter.format(self.amount, self.currency)
     }
 }
 
@@ -295,18 +298,18 @@ where
 /// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies and those with statically-typed currencies. Both the amounts
 /// and the currency codes must match.
-impl<'c, C> PartialEq<Money<&'c dyn Currency>> for Money<C>
+impl<C> PartialEq<Money<&dyn Currency>> for Money<C>
 where
     C: Currency + PartialEq,
 {
-    fn eq(&self, other: &Money<&'c dyn Currency>) -> bool {
+    fn eq(&self, other: &Money<&dyn Currency>) -> bool {
         self.amount == other.amount && self.currency.code() == other.currency.code()
     }
 }
 
 /// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies. Both the amounts and currency codes must match.
-impl<'c> PartialEq for Money<&'c dyn Currency> {
+impl PartialEq for Money<&dyn Currency> {
     fn eq(&self, other: &Self) -> bool {
         self.amount == other.amount && self.currency.code() == other.currency.code()
     }
@@ -315,7 +318,7 @@ impl<'c> PartialEq for Money<&'c dyn Currency> {
 /// Allows equality comparisons between Money instances with dynamically-typed
 /// currencies and those with statically-typed currencies. Both the amounts
 /// and currency codes must match.
-impl<'c, C> PartialEq<Money<C>> for Money<&'c dyn Currency>
+impl<C> PartialEq<Money<C>> for Money<&dyn Currency>
 where
     C: Currency,
 {
@@ -352,7 +355,7 @@ macro_rules! impl_binary_op {
         /// Supports $trait for two Money instances with dynamically-typed currencies.
         /// The Output is a Result instead of a Money since the operation
         /// can fail if the currencies are incompatible.
-        impl<'c> $trait for Money<&'c dyn Currency> {
+        impl $trait for Money<&dyn Currency> {
             type Output = Result<Self, MoneyMathError>;
 
             fn $method(self, rhs: Self) -> Self::Output {
@@ -374,7 +377,7 @@ macro_rules! impl_binary_op {
         /// and a Money instance with a statically-typed Currency. The Output
         /// is a Result since the operation can fail if the currencies are
         /// incompatible.
-        impl<'c, C> $trait<Money<C>> for Money<&'c dyn Currency>
+        impl<C> $trait<Money<C>> for Money<&dyn Currency>
         where
             C: Currency,
         {
@@ -399,13 +402,13 @@ macro_rules! impl_binary_op {
         /// and a Money instance with a dynamically-typed Currency. The output
         /// is a Result since the operation can fail if the currencies are
         /// incompatible.
-        impl<'c, C> $trait<Money<&'c dyn Currency>> for Money<C>
+        impl<C> $trait<Money<&dyn Currency>> for Money<C>
         where
             C: Currency,
         {
             type Output = Result<Self, MoneyMathError>;
 
-            fn $method(self, rhs: Money<&'c dyn Currency>) -> Self::Output {
+            fn $method(self, rhs: Money<&dyn Currency>) -> Self::Output {
                 if self.currency.code() == rhs.currency.code() {
                     Ok(Self {
                         amount: self.amount.$method(rhs.amount),
@@ -446,7 +449,7 @@ macro_rules! impl_unary_op {
         }
 
         /// Supports $trait for Money instances with dynamically-typed currencies.
-        impl<'c> $trait for Money<&'c dyn Currency> {
+        impl $trait for Money<&dyn Currency> {
             type Output = Self;
 
             fn $method(self) -> Self::Output {
@@ -474,7 +477,7 @@ where
 
 /// Allows ordering comparisons for Money instances with
 /// dynamically-typed currencies.
-impl<'c> PartialOrd for Money<&'c dyn Currency> {
+impl PartialOrd for Money<&dyn Currency> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         if self.currency.code() == other.currency.code() {
             self.amount.partial_cmp(&other.amount)
@@ -501,7 +504,7 @@ where
 }
 
 #[cfg(feature = "serde")]
-impl<'c> Serialize for Money<&'c dyn Currency> {
+impl Serialize for Money<&dyn Currency> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -525,7 +528,7 @@ where
     }
 }
 
-impl<'c> Display for Money<&'c dyn Currency> {
+impl Display for Money<&dyn Currency> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {}", self.amount, self.currency.code())
     }
