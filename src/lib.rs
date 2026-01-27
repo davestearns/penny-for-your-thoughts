@@ -17,8 +17,8 @@
 //! };
 //!
 //! // Instances with statically-typed currencies.
-//! let m_usd = Money::new(Decimal::ONE, USD);
-//! let m_jpy = Money::new(Decimal::ONE, JPY);
+//! let m_usd = Money::new(1, USD);
+//! let m_jpy = Money::new(1, JPY);
 //!
 //! // This won't even compile because they are two different types.
 //! // let no_compile = m_usd + m_jpy;
@@ -26,19 +26,19 @@
 //! // But you can add same currencies together.
 //! assert_eq!(
 //!   m_usd + m_usd,
-//!   Money::new(Decimal::TWO, USD)
+//!   Money::new(2, USD)
 //! );
 //!
 //! // If you don't know the currency until runtime, just use a
 //! // dynamically-typed Currency (&dyn Currency).
 //! let currency_map = CurrencyMap::from_collection(vec![&USD as &dyn Currency, &JPY]);
-//! let m_dyn_usd = Money::new(Decimal::ONE, currency_map.get("USD").unwrap());
-//! let m_dyn_jpy = Money::new(Decimal::ONE, currency_map.get("JPY").unwrap());
+//! let m_dyn_usd = Money::new(1, currency_map.get("USD").unwrap());
+//! let m_dyn_jpy = Money::new(1, currency_map.get("JPY").unwrap());
 //!
 //! // Adding same currencies produces an Ok Result.
 //! assert_eq!(
 //!     m_dyn_usd + m_dyn_usd,
-//!     Ok(Money::new(Decimal::TWO, currency_map.get("USD").unwrap()))
+//!     Ok(Money::new(2, currency_map.get("USD").unwrap()))
 //! );
 //!
 //! // Adding different currencies produces an Err Result.
@@ -80,7 +80,7 @@
 //! # }
 //! ```
 //!
-//! ## Installation
+//! ## Installation and Features
 //! ```bash
 //! cargo add doubloon
 //! ```
@@ -106,6 +106,30 @@
 //! to resolve and construct the appropriate `Currency`
 //! instance, and pass that as well as the `Decimal` to
 //! `Money::new()`.
+//!
+//! ## Changes from Previous Versions
+//!
+//! ### Version 1.0.0 -> 2.0.0
+//! - Multiplication, division, and remainder operations now
+//! take a numeric argument instead of another `Money` instance.
+//! This makes more intuitive sense: one typically multiplies
+//! a price against a quantity, not another price, to get an
+//! extended price.
+//! - Support for the `Pow` trait has been removed. I originally
+//! included this because it was supported by the underlying
+//! `Decimal`, but after thinking about it more, I realized it
+//! doesn't really make sense to raise a monetary amount to a power.
+//! There aren't "dollars squared" like there are "meters squared."
+//! - `Money::new()` now accepts anything that implements
+//! `Into<Decimal>` for the amount, including integer literals.
+//!
+//! ### Version 0.2.0 -> 1.0.0
+//! - Formatting is now locale-aware, thanks to the `icu` crate.
+//! The `.format()` method now requires an icu `Locale`, which
+//! will affect how the monetary amount will be formatted. Since
+//! the icu crate is rather chunky, formatting is now an optional
+//! feature.
+//!
 
 use std::{
     fmt::Display,
@@ -206,8 +230,11 @@ where
     /// The currency argument can be either an owned statically-typed
     /// Currency instance, or a dynamically-typed reference
     /// to a Currency instance (i.e., `&dyn Currency`).
-    pub fn new(amount: Decimal, currency: C) -> Self {
-        Self { amount, currency }
+    pub fn new<N: Into<Decimal>>(amount: N, currency: C) -> Self {
+        Self {
+            amount: amount.into(),
+            currency,
+        }
     }
 
     /// Returns a copy of the amount as a Decimal.
@@ -587,6 +614,11 @@ mod tests {
         let m2 = Money::new(Decimal::TWO, JPY);
         assert_eq!(m2.amount(), Decimal::TWO);
         assert_eq!(m2.currency, JPY);
+
+        // from numeric literal
+        let m3 = Money::new(1, USD);
+        assert_eq!(m3.amount(), Decimal::ONE);
+        assert_eq!(m3.currency, USD);
     }
 
     #[test]
@@ -610,6 +642,10 @@ mod tests {
         let m2 = Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap());
         assert_eq!(m2.amount(), Decimal::ONE);
         assert_eq!(m2.currency(), &JPY);
+
+        let m3 = Money::new(1, CURRENCIES.get("USD").unwrap());
+        assert_eq!(m3.amount(), Decimal::ONE);
+        assert_eq!(m3.currency(), &USD);
     }
 
     #[test]
@@ -859,25 +895,19 @@ mod tests {
     #[test]
     fn multiply() {
         // static
-        assert_eq!(
-            Money::new(Decimal::TEN, USD) * 10,
-            Money::new(Decimal::ONE_HUNDRED, USD)
-        );
-        assert_eq!(
-            Money::new(Decimal::TEN, USD) * Decimal::TEN,
-            Money::new(Decimal::ONE_HUNDRED, USD)
-        );
+        assert_eq!(Money::new(10, USD) * 10, Money::new(100, USD));
+        assert_eq!(Money::new(10, USD) * Decimal::TEN, Money::new(100, USD));
 
         //dynamic
         let currency_usd = CURRENCIES.get("USD").unwrap();
 
         assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) * 10,
-            Money::new(Decimal::ONE_HUNDRED, currency_usd)
+            Money::new(10, currency_usd) * 10,
+            Money::new(100, currency_usd)
         );
         assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) * Decimal::TEN,
-            Money::new(Decimal::ONE_HUNDRED, currency_usd)
+            Money::new(10, currency_usd) * Decimal::TEN,
+            Money::new(100, currency_usd)
         );
     }
 
