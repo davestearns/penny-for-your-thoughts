@@ -112,7 +112,7 @@ use std::{
     ops::{Add, Div, Mul, Neg, Rem, Sub},
 };
 
-use rust_decimal::{Decimal, MathematicalOps};
+use rust_decimal::Decimal;
 use thiserror::Error;
 
 #[cfg(feature = "serde")]
@@ -228,14 +228,6 @@ where
     /// Returns true if the amount is negative.
     pub fn is_negative(&self) -> bool {
         self.amount.is_sign_negative()
-    }
-
-    /// Returns a new instance raised to the specified power.
-    pub fn pow(&self, exponent: i64) -> Self {
-        Self {
-            amount: self.amount.powi(exponent),
-            currency: self.currency,
-        }
     }
 
     /// Returns a new instance rounded to the specified number
@@ -960,19 +952,6 @@ mod tests {
         assert_eq!(
             -Money::new(Decimal::ONE, currency_usd),
             Money::new(Decimal::NEGATIVE_ONE, currency_usd)
-        );
-    }
-
-    #[test]
-    fn pow() {
-        assert_eq!(
-            Money::new(Decimal::TEN, USD).pow(2),
-            Money::new(Decimal::ONE_HUNDRED, USD)
-        );
-        let currency_usd = CURRENCIES.get("USD").unwrap();
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_usd).pow(2),
-            Money::new(Decimal::ONE_HUNDRED, currency_usd)
         );
     }
 
