@@ -85,14 +85,6 @@ pub trait Currency {
     /// Currencies like USD and EUR currently support 2, but others
     /// like JPY or KRW support zero.
     fn minor_units(&self) -> u32;
-    /// Returns the symbol used to represent this currency.
-    /// For example `$` for USD or `¥` for JPY. Some currencies
-    /// use a series of letters instead of a special symbol
-    /// (e.g., `CHF` or `Lek`). If the currency has no defined
-    /// symbol, this will return an empty string.
-    fn symbol(&self) -> &'static str;
-    /// Returns the informal name for this currency.
-    fn name(&self) -> &'static str;
     /// Returns the unique ISO numeric code for this currency.
     fn numeric_code(&self) -> u32;
 }
@@ -129,14 +121,6 @@ impl Currency for USD {
         "USD"
     }
 
-    fn symbol(&self) -> &'static str {
-        "$"
-    }
-
-    fn name(&self) -> &'static str {
-        "US Dollar"
-    }
-
     fn minor_units(&self) -> u32 {
         2
     }
@@ -152,14 +136,6 @@ pub struct JPY;
 impl Currency for JPY {
     fn code(&self) -> &'static str {
         "JPY"
-    }
-
-    fn symbol(&self) -> &'static str {
-        "¥"
-    }
-
-    fn name(&self) -> &'static str {
-        "Yen"
     }
 
     fn minor_units(&self) -> u32 {
