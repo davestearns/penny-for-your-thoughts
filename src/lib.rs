@@ -335,6 +335,8 @@ pub enum MoneyMathError {
     IncompatibleCurrencies(&'static str, &'static str),
 }
 
+/// Macro for implementing a binary operation where the
+/// right-hand side is another Money instance.
 macro_rules! impl_binary_op {
     ($trait:ident, $method:ident) => {
         /// Supports $trait for Money instances with the same statically-typed currency.
@@ -427,9 +429,47 @@ macro_rules! impl_binary_op {
 
 impl_binary_op!(Add, add);
 impl_binary_op!(Sub, sub);
-impl_binary_op!(Mul, mul);
-impl_binary_op!(Div, div);
-impl_binary_op!(Rem, rem);
+
+/// Macro for implementing a binary operation where the
+/// right-hand side is a numeric value (not another Money).
+macro_rules! impl_binary_numeric_op {
+    ($trait:ident, $method:ident) => {
+        /// Supports $trait for Money instances with a statically-typed currency.
+        impl<C, N> $trait<N> for Money<C>
+        where
+            C: Currency,
+            N: Into<Decimal>,
+        {
+            type Output = Self;
+
+            fn $method(self, rhs: N) -> Self::Output {
+                Self {
+                    amount: self.amount.$method(rhs.into()),
+                    currency: self.currency,
+                }
+            }
+        }
+
+        /// Supports $trait for Money instances with a dynamically-typed currency.
+        impl<N> $trait<N> for Money<&dyn Currency>
+        where
+            N: Into<Decimal>,
+        {
+            type Output = Self;
+
+            fn $method(self, rhs: N) -> Self::Output {
+                Self {
+                    amount: self.amount.$method(rhs.into()),
+                    currency: self.currency,
+                }
+            }
+        }
+    };
+}
+
+impl_binary_numeric_op!(Mul, mul);
+impl_binary_numeric_op!(Div, div);
+impl_binary_numeric_op!(Rem, rem);
 
 macro_rules! impl_unary_op {
     ($trait:ident, $method:ident) => {
@@ -828,43 +868,24 @@ mod tests {
     fn multiply() {
         // static
         assert_eq!(
-            Money::new(Decimal::TEN, USD) * Money::new(Decimal::TEN, USD),
+            Money::new(Decimal::TEN, USD) * 10,
+            Money::new(Decimal::ONE_HUNDRED, USD)
+        );
+        assert_eq!(
+            Money::new(Decimal::TEN, USD) * Decimal::TEN,
             Money::new(Decimal::ONE_HUNDRED, USD)
         );
 
-        //dynamic, same currency
+        //dynamic
         let currency_usd = CURRENCIES.get("USD").unwrap();
-        let currency_jpy = CURRENCIES.get("JPY").unwrap();
 
         assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) * Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::ONE_HUNDRED, currency_usd))
-        );
-
-        // dynamic, different currencies
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_jpy) * Money::new(Decimal::TEN, currency_usd),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
-        );
-
-        // mixed, same currency
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) * Money::new(Decimal::TEN, USD),
-            Ok(Money::new(Decimal::ONE_HUNDRED, currency_usd))
+            Money::new(Decimal::TEN, currency_usd) * 10,
+            Money::new(Decimal::ONE_HUNDRED, currency_usd)
         );
         assert_eq!(
-            Money::new(Decimal::TEN, USD) * Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::ONE_HUNDRED, USD))
-        );
-
-        // mixed, different currencies
-        assert_eq!(
-            Money::new(Decimal::TEN, JPY) * Money::new(Decimal::TEN, currency_usd),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
-        );
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_jpy) * Money::new(Decimal::TEN, USD),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+            Money::new(Decimal::TEN, currency_usd) * Decimal::TEN,
+            Money::new(Decimal::ONE_HUNDRED, currency_usd)
         );
     }
 
@@ -872,51 +893,32 @@ mod tests {
     fn divide() {
         // static
         assert_eq!(
-            Money::new(Decimal::TEN, USD) / Money::new(Decimal::TWO, USD),
+            Money::new(Decimal::TEN, USD) / 2,
             Money::new(Decimal::new(5, 0), USD)
         );
         assert_eq!(
-            Money::new(Decimal::TWO, USD) / Money::new(Decimal::TEN, USD),
+            Money::new(Decimal::TEN, USD) / Decimal::TWO,
+            Money::new(Decimal::new(5, 0), USD)
+        );
+        assert_eq!(
+            Money::new(Decimal::TWO, USD) / Decimal::TEN,
             Money::new(Decimal::new(2, 1), USD)
         );
 
-        //dynamic, same currency
+        //dynamic
         let currency_usd = CURRENCIES.get("USD").unwrap();
-        let currency_jpy = CURRENCIES.get("JPY").unwrap();
 
         assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) / Money::new(Decimal::TWO, currency_usd),
-            Ok(Money::new(Decimal::new(5, 0), currency_usd))
+            Money::new(Decimal::TEN, currency_usd) / 2,
+            Money::new(Decimal::new(5, 0), currency_usd)
         );
         assert_eq!(
-            Money::new(Decimal::TWO, currency_usd) / Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::new(2, 1), currency_usd))
-        );
-
-        // dynamic, different currencies
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_jpy) / Money::new(Decimal::TWO, currency_usd),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
-        );
-
-        // mixed, same currency
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) / Money::new(Decimal::TWO, USD),
-            Ok(Money::new(Decimal::new(5, 0), currency_usd))
+            Money::new(Decimal::TEN, currency_usd) / Decimal::TWO,
+            Money::new(Decimal::new(5, 0), currency_usd)
         );
         assert_eq!(
-            Money::new(Decimal::TWO, USD) / Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::new(2, 1), USD))
-        );
-
-        // mixed, different currencies
-        assert_eq!(
-            Money::new(Decimal::TEN, JPY) / Money::new(Decimal::TWO, currency_usd),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
-        );
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_jpy) / Money::new(Decimal::TWO, USD),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+            Money::new(Decimal::TWO, currency_usd) / Decimal::TEN,
+            Money::new(Decimal::new(2, 1), currency_usd)
         );
     }
 
@@ -924,39 +926,24 @@ mod tests {
     fn rem() {
         // static
         assert_eq!(
-            Money::new(Decimal::TEN, USD) % Money::new(Decimal::TEN, USD),
+            Money::new(Decimal::TEN, USD) % 10,
+            Money::new(Decimal::ZERO, USD)
+        );
+        assert_eq!(
+            Money::new(Decimal::TEN, USD) % Decimal::TEN,
             Money::new(Decimal::ZERO, USD)
         );
 
-        //dynamic, same currency
+        //dynamic
         let currency_usd = CURRENCIES.get("USD").unwrap();
-        let currency_jpy = CURRENCIES.get("JPY").unwrap();
 
         assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) % Money::new(Decimal::TEN, currency_usd),
-            Ok(Money::new(Decimal::ZERO, currency_usd))
-        );
-
-        // dynamic, different currencies
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_jpy) % Money::new(Decimal::TEN, currency_usd),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
-        );
-
-        // mixed, same currency
-        assert_eq!(
-            Money::new(Decimal::TEN, currency_usd) % Money::new(Decimal::TEN, USD),
-            Ok(Money::new(Decimal::ZERO, currency_usd))
-        );
-
-        // mixed, different currencies
-        assert_eq!(
-            Money::new(Decimal::TEN, JPY) % Money::new(Decimal::TEN, currency_usd),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+            Money::new(Decimal::TEN, currency_usd) % 10,
+            Money::new(Decimal::ZERO, currency_usd)
         );
         assert_eq!(
-            Money::new(Decimal::TEN, currency_jpy) % Money::new(Decimal::TEN, USD),
-            Err(MoneyMathError::IncompatibleCurrencies("JPY", "USD"))
+            Money::new(Decimal::TEN, currency_usd) % Decimal::TEN,
+            Money::new(Decimal::ZERO, currency_usd)
         );
     }
 
