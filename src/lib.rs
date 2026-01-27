@@ -111,24 +111,24 @@
 //!
 //! ### Version 1.0.0 -> 2.0.0
 //! - Multiplication, division, and remainder operations now
-//! take a numeric argument instead of another `Money` instance.
-//! This makes more intuitive sense: one typically multiplies
-//! a price against a quantity, not another price, to get an
-//! extended price.
+//!   take a numeric argument instead of another `Money` instance.
+//!   This makes more intuitive sense: one typically multiplies
+//!   a price against a quantity, not another price, to get an
+//!   extended price.
 //! - Support for the `Pow` trait has been removed. I originally
-//! included this because it was supported by the underlying
-//! `Decimal`, but after thinking about it more, I realized it
-//! doesn't really make sense to raise a monetary amount to a power.
-//! There aren't "dollars squared" like there are "meters squared."
+//!   included this because it was supported by the underlying
+//!   `Decimal`, but after thinking about it more, I realized it
+//!   doesn't really make sense to raise a monetary amount to a power.
+//!   There aren't "dollars squared" like there are "meters squared."
 //! - `Money::new()` now accepts anything that implements
-//! `Into<Decimal>` for the amount, including integer literals.
+//!   `Into<Decimal>` for the amount, including integer literals.
 //!
 //! ### Version 0.2.0 -> 1.0.0
 //! - Formatting is now locale-aware, thanks to the `icu` crate.
-//! The `.format()` method now requires an icu `Locale`, which
-//! will affect how the monetary amount will be formatted. Since
-//! the icu crate is rather chunky, formatting is now an optional
-//! feature.
+//!   The `.format()` method now requires an icu `Locale`, which
+//!   will affect how the monetary amount will be formatted. Since
+//!   the icu crate is rather chunky, formatting is now an optional
+//!   feature.
 //!
 
 use std::{
