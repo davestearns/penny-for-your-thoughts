@@ -226,8 +226,8 @@ impl<C> Money<C> {
     /// The currency argument can be either an owned statically-typed
     /// Currency instance, or a dynamically-typed reference
     /// to a Currency instance (i.e., `&dyn Currency`).
-    pub fn new(amount: Decimal, currency: C) -> Self {
-        Self { amount, currency }
+    pub fn new<N: Into<Decimal>>(amount: N, currency: C) -> Self {
+        Self { amount: amount.into(), currency }
     }
 
     /// Returns a copy of the amount as a Decimal.
@@ -276,14 +276,14 @@ Now we can create Money instances with a statically-typed `Currency`:
 
 ```rust
 // m_usd is type Money<USD>
-let m_usd = Money::new(Decimal::ONE, USD);
+let m_usd = Money::new(1, USD);
 assert_eq!(m_usd.currency(), USD);
-assert_eq!(m_usd.amount(), Decimal::ONE);
+assert_eq!(m_usd.amount(), 1);
 
 // m_jpy is type Money<JPY>
-let m_jpy = Money::new(Decimal::ONE, JPY);
+let m_jpy = Money::new(1, JPY);
 assert_eq!(m_jpy.currency(), JPY);
-assert_eq!(m_jpy.amount(), Decimal::ONE);
+assert_eq!(m_jpy.amount(), 1);
 
 // This won't even compile because they are totally different types
 // assert_eq!(m_usd, m_jpy);
@@ -323,10 +323,10 @@ like this:
 let dynamic_currency = CURRENCIES.get("USD").unwrap();
 
 // money is of type `Money<&dyn Currency>`
-let money = Money::new(Decimal::ONE, dynamic_currency);
+let money = Money::new(1, dynamic_currency);
 assert_eq!(money.currency().code(), "USD");
 
-let other_money = Money::new(Decimal::ONE, CURRENCIES.get("JPY").unwrap());
+let other_money = Money::new(1, CURRENCIES.get("JPY").unwrap());
 assert_eq!(other_money.currency().code(), "JPY");
 ```
 
@@ -486,21 +486,21 @@ With all of this we can now do Money math like so:
 ```rust
 // statically-typed
 assert_eq!(
-    Money::new(Decimal::ONE, USD) + Money::new(Decimal::ONE, USD),
-    Money::new(Decimal::TWO, USD),
+    Money::new(1, USD) + Money::new(1, USD),
+    Money::new(2, USD),
 );
 
 // dynamically-typed, same currency -> Ok
 let currency_usd = CURRENCIES.get("USD").unwrap();
 assert_eq!(
-    Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_usd),
-    Ok(Money::new(Decimal::TWO, currency_usd)),
+    Money::new(1, currency_usd) + Money::new(1, currency_usd),
+    Ok(Money::new(2, currency_usd)),
 );
 
 // dynamically-typed, different currencies -> Err
 let currency_jpy = CURRENCIES.get("JPY").unwrap();
 assert_eq!(
-    Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_jpy),
+    Money::new(1, currency_usd) + Money::new(1, currency_jpy),
     Err(MoneyMathError::IncompatibleCurrencies(
         currency_usd.code(),
         currency_jpy.code(),
@@ -509,13 +509,13 @@ assert_eq!(
 
 // dynamically-typed + statically-typed, same currency -> Ok(dynamically-typed)
 assert_eq!(
-    Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, USD),
-    Ok(Money::new(Decimal::TWO, currency_usd)),
+    Money::new(1, currency_usd) + Money::new(1, USD),
+    Ok(Money::new(2, currency_usd)),
 );
 
 // dynamically-typed + statically-typed, different currencies -> Err
 assert_eq!(
-    Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, JPY),
+    Money::new(1, currency_usd) + Money::new(1, JPY),
     Err(MoneyMathError::IncompatibleCurrencies(
         currency_usd.code(),
         JPY.code()
@@ -524,18 +524,18 @@ assert_eq!(
 
 // statically-typed, multi-term
 assert_eq!(
-    Money::new(Decimal::ONE, USD)
-        + Money::new(Decimal::ONE, USD)
-        + Money::new(Decimal::ONE, USD),
-    Money::new(Decimal::new(3, 0), USD),
+    Money::new(1, USD)
+        + Money::new(1, USD)
+        + Money::new(1, USD),
+    Money::new(3, USD),
 );
 
 // dynamically-typed, multi-term using Result::and_then()
 // (if an error occurs, closures are skipped and final result is an error)
 assert_eq!(
-    (Money::new(Decimal::ONE, currency_usd) + Money::new(Decimal::ONE, currency_usd))
-        .and_then(|m| m + Money::new(Decimal::ONE, currency_usd)),
-    Ok(Money::new(Decimal::new(3, 0), currency_usd)),
+    (Money::new(1, currency_usd) + Money::new(1, currency_usd))
+        .and_then(|m| m + Money::new(1, currency_usd)),
+    Ok(Money::new(3, currency_usd)),
 );
 ```
 
@@ -742,8 +742,8 @@ impl<C> Money<C>
 where
     C: CurrencyOrRef,
 {
-    pub fn new(amount: Decimal, currency: C) -> Self {
-        Self { amount, currency }
+    pub fn new<N: Into<Decimal>>(amount: N, currency: C) -> Self {
+        Self { amount: amount.into(), currency }
     }
 }
 
@@ -798,8 +798,8 @@ where
     /// Construct a Money from a decimal amount and currency.
     /// (This doesn't strictly need the minor units but we include
     /// it here to take advantage of the marker trait).
-    pub fn new(amount: Decimal, currency: C) -> Self {
-        Self { amount, currency }
+    pub fn new<N: Into<Decimal>>(amount: N, currency: C) -> Self {
+        Self { amount: amount.into(), currency }
     }
 
     /// Constructs a Money from some number of minor units in the
