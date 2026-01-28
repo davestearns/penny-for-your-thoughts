@@ -109,7 +109,7 @@
 //!
 //! ## Changes from Previous Versions
 //!
-//! ### Version 2.0.0 -> 2.1.0
+//! ### Version 2.0.0 -> 3.0.0
 //! - The `round()` method now rounds the amount to the
 //!   currency's number of minor units by default.
 //!   Use the new `round_to_precision()` to round the amount
