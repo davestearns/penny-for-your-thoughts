@@ -109,6 +109,16 @@
 //!
 //! ## Changes from Previous Versions
 //!
+//! ### Version 2.0.0 -> 2.1.0
+//! - New `round_to_minor_units()` method that rounds to
+//!   the currency's number of minor units (whatever that
+//!   happens to be). This is equivalent to calling `round()`
+//!   passing `self.currency.minor_units()` as the number
+//!   of decimal places, but perhaps more convenient.
+//! - New `to_minor_units()` method that returns the amount
+//!   in currency minor units, suitable for sending to a
+//!   payment processor.
+//!
 //! ### Version 1.0.0 -> 2.0.0
 //! - Multiplication, division, and remainder operations now
 //!   take a numeric argument instead of another `Money` instance.
@@ -136,7 +146,7 @@ use std::{
     ops::{Add, Div, Mul, Neg, Rem, Sub},
 };
 
-use rust_decimal::Decimal;
+use rust_decimal::{prelude::ToPrimitive, Decimal};
 use thiserror::Error;
 
 #[cfg(feature = "serde")]
@@ -259,7 +269,7 @@ where
 
     /// Returns a new instance rounded to the specified number
     /// of decimal places, using the specified strategy.
-    pub fn round_to_precision(&self, decimal_places: u32, strategy: RoundingStrategy) -> Self {
+    pub fn round(&self, decimal_places: u32, strategy: RoundingStrategy) -> Self {
         Self {
             amount: self.amount.round_dp_with_strategy(decimal_places, strategy),
             currency: self.currency,
@@ -281,6 +291,20 @@ where
             currency,
         }
     }
+
+    /// Returns the amount in currency minor units, suitable for sending to
+    /// a payment processor. If the amount is at a higher precision
+    /// than the currency's number of minor units, the amount will
+    /// be rounded using the specified rounding strategy. If the amount
+    /// can't be safely represented as an i64, None will be returned.
+    pub fn to_minor_units(&self, rounding_strategy: RoundingStrategy) -> Option<i64> {
+        let num_minor_units = self.currency.minor_units();
+        let multiplier = Decimal::from(10_u64.pow(num_minor_units));
+        self.amount
+            .round_dp_with_strategy(num_minor_units, rounding_strategy)
+            .mul(multiplier)
+            .to_i64()
+    }
 }
 
 /// Functions specifically for owned statically-typed Currency instances.
@@ -295,7 +319,7 @@ where
 
     /// Returns a new instance rounded to the amount of minor
     /// units defined by the Currency.
-    pub fn round(&self, strategy: RoundingStrategy) -> Self {
+    pub fn round_to_minor_units(&self, strategy: RoundingStrategy) -> Self {
         Self {
             amount: self
                 .amount
@@ -314,7 +338,7 @@ impl Money<&dyn Currency> {
 
     /// Returns a new instance rounded to the amount of minor
     /// units defined by the Currency.
-    pub fn round(&self, strategy: RoundingStrategy) -> Self {
+    pub fn round_to_minor_units(&self, strategy: RoundingStrategy) -> Self {
         Self {
             amount: self
                 .amount
@@ -1025,12 +1049,12 @@ mod tests {
     fn round() {
         assert_eq!(
             Money::new(Decimal::new(1555, 3), USD)
-                .round(RoundingStrategy::MidpointNearestEven),
-            Money::new(Decimal::new(156,2), USD)
+                .round_to_minor_units(RoundingStrategy::MidpointNearestEven),
+            Money::new(Decimal::new(156, 2), USD)
         );
         assert_eq!(
             Money::new(Decimal::new(1555, 3), USD)
-                .round(RoundingStrategy::MidpointTowardZero),
+                .round_to_minor_units(RoundingStrategy::MidpointTowardZero),
             Money::new(Decimal::new(155, 2), USD)
         );
     }
@@ -1038,13 +1062,11 @@ mod tests {
     #[test]
     fn round_to_precision() {
         assert_eq!(
-            Money::new(Decimal::new(15, 1), USD)
-                .round_to_precision(0, RoundingStrategy::MidpointNearestEven),
+            Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointNearestEven),
             Money::new(Decimal::TWO, USD)
         );
         assert_eq!(
-            Money::new(Decimal::new(15, 1), USD)
-                .round_to_precision(0, RoundingStrategy::MidpointTowardZero),
+            Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointTowardZero),
             Money::new(Decimal::ONE, USD)
         );
     }
@@ -1092,5 +1114,37 @@ mod tests {
 
         let json = serde_json::to_string(&Money::new(Decimal::ONE, &USD as &dyn Currency)).unwrap();
         assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn to_minor_units() {
+        let m = Money::new(Decimal::new(1045, 2), USD);
+        assert_eq!(
+            Some(1045),
+            m.to_minor_units(RoundingStrategy::MidpointNearestEven)
+        );
+
+        // JPY has zero minor units
+        let m = Money::new(Decimal::new(1045, 0), JPY);
+        assert_eq!(
+            Some(1045),
+            m.to_minor_units(RoundingStrategy::MidpointNearestEven)
+        );
+    }
+
+    #[test]
+    fn to_minor_units_rounding() {
+        let m = Money::new(Decimal::new(104567, 4), USD);
+        assert_eq!(
+            Some(1046),
+            m.to_minor_units(RoundingStrategy::MidpointNearestEven)
+        );
+
+        // JPY has zero minor units so it should round to just 10
+        let m = Money::new(Decimal::new(104567, 4), JPY);
+        assert_eq!(
+            Some(10),
+            m.to_minor_units(RoundingStrategy::MidpointNearestEven)
+        );
     }
 }
