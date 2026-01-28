@@ -259,7 +259,7 @@ where
 
     /// Returns a new instance rounded to the specified number
     /// of decimal places, using the specified strategy.
-    pub fn round(&self, decimal_places: u32, strategy: RoundingStrategy) -> Self {
+    pub fn round_to_precision(&self, decimal_places: u32, strategy: RoundingStrategy) -> Self {
         Self {
             amount: self.amount.round_dp_with_strategy(decimal_places, strategy),
             currency: self.currency,
@@ -292,6 +292,17 @@ where
     pub fn currency(&self) -> C {
         self.currency
     }
+
+    /// Returns a new instance rounded to the amount of minor
+    /// units defined by the Currency.
+    pub fn round(&self, strategy: RoundingStrategy) -> Self {
+        Self {
+            amount: self
+                .amount
+                .round_dp_with_strategy(self.currency.minor_units(), strategy),
+            currency: self.currency,
+        }
+    }
 }
 
 /// Functions specifically for borrowed dynamically-typed currencies.
@@ -299,6 +310,17 @@ impl Money<&dyn Currency> {
     /// Returns the reference to the dynamically-typed Currency.
     pub fn currency(&self) -> &dyn Currency {
         self.currency
+    }
+
+    /// Returns a new instance rounded to the amount of minor
+    /// units defined by the Currency.
+    pub fn round(&self, strategy: RoundingStrategy) -> Self {
+        Self {
+            amount: self
+                .amount
+                .round_dp_with_strategy(self.currency.minor_units(), strategy),
+            currency: self.currency,
+        }
     }
 }
 
@@ -1002,11 +1024,27 @@ mod tests {
     #[test]
     fn round() {
         assert_eq!(
-            Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointNearestEven),
+            Money::new(Decimal::new(1555, 3), USD)
+                .round(RoundingStrategy::MidpointNearestEven),
+            Money::new(Decimal::new(156,2), USD)
+        );
+        assert_eq!(
+            Money::new(Decimal::new(1555, 3), USD)
+                .round(RoundingStrategy::MidpointTowardZero),
+            Money::new(Decimal::new(155, 2), USD)
+        );
+    }
+
+    #[test]
+    fn round_to_precision() {
+        assert_eq!(
+            Money::new(Decimal::new(15, 1), USD)
+                .round_to_precision(0, RoundingStrategy::MidpointNearestEven),
             Money::new(Decimal::TWO, USD)
         );
         assert_eq!(
-            Money::new(Decimal::new(15, 1), USD).round(0, RoundingStrategy::MidpointTowardZero),
+            Money::new(Decimal::new(15, 1), USD)
+                .round_to_precision(0, RoundingStrategy::MidpointTowardZero),
             Money::new(Decimal::ONE, USD)
         );
     }
