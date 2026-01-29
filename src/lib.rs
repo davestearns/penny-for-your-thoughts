@@ -62,7 +62,7 @@
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(&locale!("ir-IR")), "€\u{a0}1,234,567.89");
 //!
-//! // tr-TR is similar to ir-IR but uses period for the group separator
+//! // tr-TR is similar to en-US but uses period for the group separator
 //! // and comma for the decimal separator.
 //! # #[cfg(feature = "formatting")]
 //! assert_eq!(m.format(&locale!("tr-TR")), "€1.234.567,89");
@@ -95,7 +95,8 @@
 //! The serde feature enables serialization to a struct
 //! with separate fields for the amount and currency,
 //! suitable for storing in a database or sending to
-//! another service or client.
+//! another service or client. The amount is serialized
+//! as a string to preserve precision.
 //!
 //! Because applications can define their own `Currency`
 //! implementations, there's no global map one can use
@@ -233,7 +234,7 @@ pub struct Money<C> {
 /// Common functions for statically and dynamically-typed currencies.
 impl<C> Money<C>
 where
-    C: Copy,
+    C: Copy, // necessary because some methods return new instance of Self
 {
     /// Constructs a new Money given a decimal amount and Currency.
     /// The currency argument can be either an owned statically-typed
@@ -279,7 +280,7 @@ where
 /// Methods that require knowing the `minor_units` of the currency.
 impl<C> Money<C>
 where
-    C: MinorUnits,
+    C: MinorUnits + Copy,
 {
     /// Constructs a Money from some number of minor units in the
     /// specified Currency. For example, 100 USD minor units is one USD,
@@ -288,6 +289,17 @@ where
         Self {
             amount: Decimal::new(minor_units, currency.minor_units()),
             currency,
+        }
+    }
+
+    /// Returns a new instance rounded to the amount of minor
+    /// units defined by the Currency.
+    pub fn round(&self, strategy: RoundingStrategy) -> Self {
+        Self {
+            amount: self
+                .amount
+                .round_dp_with_strategy(self.currency.minor_units(), strategy),
+            currency: self.currency,
         }
     }
 
@@ -309,22 +321,11 @@ where
 /// Functions specifically for owned statically-typed Currency instances.
 impl<C> Money<C>
 where
-    C: Currency + Copy, // owned Currency instances can be Copy
+    C: Currency + Copy,
 {
     /// Returns a copy of the Money's Currency.
     pub fn currency(&self) -> C {
         self.currency
-    }
-
-    /// Returns a new instance rounded to the amount of minor
-    /// units defined by the Currency.
-    pub fn round(&self, strategy: RoundingStrategy) -> Self {
-        Self {
-            amount: self
-                .amount
-                .round_dp_with_strategy(self.currency.minor_units(), strategy),
-            currency: self.currency,
-        }
     }
 }
 
@@ -333,17 +334,6 @@ impl Money<&dyn Currency> {
     /// Returns the reference to the dynamically-typed Currency.
     pub fn currency(&self) -> &dyn Currency {
         self.currency
-    }
-
-    /// Returns a new instance rounded to the amount of minor
-    /// units defined by the Currency.
-    pub fn round(&self, strategy: RoundingStrategy) -> Self {
-        Self {
-            amount: self
-                .amount
-                .round_dp_with_strategy(self.currency.minor_units(), strategy),
-            currency: self.currency,
-        }
     }
 }
 
@@ -403,7 +393,9 @@ pub enum MoneyMathError {
 /// right-hand side is another Money instance.
 macro_rules! impl_binary_op {
     ($trait:ident, $method:ident) => {
-        /// Supports $trait for Money instances with the same statically-typed currency.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for Money instances with a static currency."]
         impl<C> $trait for Money<C>
         where
             C: Currency,
@@ -418,9 +410,11 @@ macro_rules! impl_binary_op {
             }
         }
 
-        /// Supports $trait for two Money instances with dynamically-typed currencies.
-        /// The Output is a Result instead of a Money since the operation
-        /// can fail if the currencies are incompatible.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for two Money instances with dynamically-typed currencies."]
+        #[doc = " The Output is a Result instead of a Money since the operation"]
+        #[doc = " can fail if the currencies are incompatible."]
         impl $trait for Money<&dyn Currency> {
             type Output = Result<Self, MoneyMathError>;
 
@@ -439,10 +433,11 @@ macro_rules! impl_binary_op {
             }
         }
 
-        /// Support $trait for a Money instance with a dynamically-typed Currency
-        /// and a Money instance with a statically-typed Currency. The Output
-        /// is a Result since the operation can fail if the currencies are
-        /// incompatible.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for a Money instance with a dynamically-typed Currency"]
+        #[doc = " and a Money instance with a statically-typed Currency. The output"]
+        #[doc = " is a Result since the operation can fail if the currencies are incompatible."]
         impl<C> $trait<Money<C>> for Money<&dyn Currency>
         where
             C: Currency,
@@ -464,10 +459,11 @@ macro_rules! impl_binary_op {
             }
         }
 
-        /// Supports $trait for a Money instance with a statically-typed Currency
-        /// and a Money instance with a dynamically-typed Currency. The output
-        /// is a Result since the operation can fail if the currencies are
-        /// incompatible.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for a Money instance with a statically-typed Currency"]
+        #[doc = " and a Money instance with a dynamically-typed Currency. The output"]
+        #[doc = " is a Result since the operation can fail if the currencies are incompatible."]
         impl<C> $trait<Money<&dyn Currency>> for Money<C>
         where
             C: Currency,
@@ -498,7 +494,11 @@ impl_binary_op!(Sub, sub);
 /// right-hand side is a numeric value (not another Money).
 macro_rules! impl_binary_numeric_op {
     ($trait:ident, $method:ident) => {
-        /// Supports $trait for Money instances with a statically-typed currency.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for Money instances with a static currency."]
+        #[doc = " The right-hand-side of the operation can be"]
+        #[doc = " anything that can be converted into a Decimal."]
         impl<C, N> $trait<N> for Money<C>
         where
             C: Currency,
@@ -514,7 +514,11 @@ macro_rules! impl_binary_numeric_op {
             }
         }
 
-        /// Supports $trait for Money instances with a dynamically-typed currency.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for Money instances with a dynamic currency."]
+        #[doc = " The right-hand-side of the operation can be"]
+        #[doc = " anything that can be converted into a Decimal."]
         impl<N> $trait<N> for Money<&dyn Currency>
         where
             N: Into<Decimal>,
@@ -537,7 +541,9 @@ impl_binary_numeric_op!(Rem, rem);
 
 macro_rules! impl_unary_op {
     ($trait:ident, $method:ident) => {
-        /// Supports $trait for Money instances with statically-typed currencies.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for Money instances with a static currency."]
         impl<C> $trait for Money<C>
         where
             C: Currency,
@@ -552,7 +558,9 @@ macro_rules! impl_unary_op {
             }
         }
 
-        /// Supports $trait for Money instances with dynamically-typed currencies.
+        #[doc = "Supports "]
+        #[doc = stringify!($trait)]
+        #[doc = " for Money instances with a dynamic currency."]
         impl $trait for Money<&dyn Currency> {
             type Output = Self;
 
@@ -622,7 +630,7 @@ impl Serialize for Money<&dyn Currency> {
 
 /// [Display::fmt] is supposed to be infallible, so this just writes the amount
 /// followed by the currency code. For more sophisticated formatting, use the
-/// [Money::format] method, which may return an Err result.
+/// the format method available with the "formatting" crate feature.
 impl<C> Display for Money<C>
 where
     C: Currency,
