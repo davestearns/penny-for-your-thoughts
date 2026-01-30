@@ -64,7 +64,6 @@ impl<C> Money<C>
 where
     C: Currency + Copy,
 {
-    #[cfg(feature = "formatting")]
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: &Locale) -> String {
@@ -87,7 +86,6 @@ where
 
 /// Functions specifically for borrowed dynamically-typed currencies.
 impl Money<&dyn Currency> {
-    #[cfg(feature = "formatting")]
     /// Formats this Money instance as a locale-aware string suitable for
     /// showing to a user. This uses the `icu` crate for CLDR formatting rules.
     pub fn format(&self, locale: &Locale) -> String {
