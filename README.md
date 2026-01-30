@@ -1,10 +1,8 @@
-# Penny for your Thoughts (on Rust trait bounds)
+# Doubloon
 
 [![CI](https://github.com/davestearns/penny-for-your-thoughts/actions/workflows/ci.yml/badge.svg)](https://github.com/davestearns/penny-for-your-thoughts/actions/workflows/ci.yml)
 [![Crates.io Version](https://img.shields.io/crates/v/doubloon)](https://crates.io/crates/doubloon)
 [![Documentation](https://docs.rs/doubloon/badge.svg)](https://docs.rs/doubloon)
-
-**AKA: doubloon**
 
 This library implements a `Money` datatype that supports both a statically-typed
 and dynamically-typed `Currency`. That is to say, you can create a `Money<USD>`
@@ -16,12 +14,11 @@ returns a fallible `Result` because the currencies might be different).
 My main motivation for building this was to learn more about Rust trait bounds
 and custom operators. But I was also recently looking for a crate to represent
 an amount of money in a currency, and I noticed that the most popular one,
-[rusty_money](https://github.com/varunsrin/rusty_money), hasn't been updated in
-a while, and has several outstanding issues and pull requests that are more than
-a year old. It also has a rather un-ergonomic API and set of behaviors: for
-example, it requires the use of explicit lifetimes (which naturally infect all
-types that use it), and it simply panics when you do math on instances with
-different currencies.
+[rusty_money](https://github.com/varunsrin/rusty_money), hadn't been updated in
+a while (as of 2024---it's more active now). It also has a rather un-ergonomic
+API and set of behaviors: for example, it requires the use of explicit lifetimes
+(which naturally infect all types that use it), and it simply panics when you do
+math on instances with different currencies.
 
 Although I'm fairly new to Rust, I felt like the powerful language features
 could support a better and more flexible experience, so I built something new,
@@ -41,7 +38,8 @@ I wanted a Money data type that offered the following features:
   number of minor units, as
   [Iceland did in 2007](https://www.ibm.com/support/pages/apar/PK52556). It also
   makes it difficult to represent fractional minor units, such as a stock price
-  expressed in eighths of a cent.
+  expressed in eighths of a cent, or a per-second usage price for a cloud
+  resource.
 - **Supports instances with statically-typed currencies:** In some applications
   you know the currency at compile time, and you want to ensure that an amount
   of `Money` in one currency can't accidentally be passed to a function
