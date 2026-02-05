@@ -515,7 +515,17 @@ assert_eq!(
 
 In the actual code, there are macros defined for binary and unary ops, which
 makes it trivial for `Money` to also support subtraction, multiplication,
-division, remainder and negation as well using the same techniques.
+division and negation as well using the same techniques.
+
+Multiplication and division work a little differently than addition and
+subtraction. It makes sense to add or subtract two different `Money` instances,
+but it doesn't really make sense to _multiply_ two monetary amounts. Instead,
+one can multiply a `Money` like a price by a simple numeric value like a
+quantity, yielding a new `Money` in the same currency. Similarly, one can divide
+a monetary amount by a numeric value, for example when dividing a check by some
+number of people, yielding a `Money` in the same currency. But you can also
+divide two `Money` instances to get the percentage difference between the two,
+provided they are in the same currency.
 
 ## Equality Comparisons
 
