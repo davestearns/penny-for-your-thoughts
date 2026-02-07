@@ -3,6 +3,8 @@ use thiserror::Error;
 
 use crate::{Currency, Money};
 
+/// Represents an exchange rate for converting monetary amounts
+/// in the 'from' [Currency] into amounts in the 'to' [Currency].
 pub struct ExchangeRate<F, T>
 where
     F: Currency,
@@ -18,6 +20,9 @@ where
     F: Currency,
     T: Currency,
 {
+    /// Constructs a new instance given the rate for converting
+    /// monetary amounts in the 'from' [Currency] into the amounts
+    /// in the 'to' [Currency].
     pub fn new(from: F, to: T, rate: Decimal) -> Self {
         ExchangeRate { from, to, rate }
     }
@@ -30,13 +35,15 @@ pub enum MoneyConversionError {
     #[error(
         "the exchange rate's 'from' currency does not match the Money instance's currency ({0}, {1})"
     )]
-    InvalidExchangeRate(&'static str, &'static str),
+    IncorrectExchangeRate(&'static str, &'static str),
 }
 
 impl<C> Money<C>
 where
     C: Currency,
 {
+    /// Returns a new [Money] in the [ExchangeRate]'s 'to' currency after multiplying
+    /// the amount by the exchange rate.
     pub fn convert<T: Currency + Copy>(&self, exchange_rate: &ExchangeRate<C, T>) -> Money<T> {
         Money {
             amount: self.amount * exchange_rate.rate,
@@ -46,6 +53,11 @@ where
 }
 
 impl Money<&dyn Currency> {
+    /// If the current dynamic [Currency] is the same as the [ExchangeRate]'s
+    /// 'from' currency, this returns an Ok value with a new [Money] in the
+    /// [ExchangeRate]'s 'to' currency after multiplying the amount by the
+    /// exchange rate. If the currencies don't match, this returns an Err
+    /// value of type [MoneyConversionError::IncorrectExchangeRate].
     pub fn convert<C: Currency, T: Currency + Copy>(
         &self,
         exchange_rate: &ExchangeRate<C, T>,
@@ -56,7 +68,7 @@ impl Money<&dyn Currency> {
                 currency: exchange_rate.to,
             })
         } else {
-            Err(MoneyConversionError::InvalidExchangeRate(
+            Err(MoneyConversionError::IncorrectExchangeRate(
                 exchange_rate.from.code(),
                 self.currency().code(),
             ))
@@ -88,7 +100,7 @@ mod tests {
 
         assert_eq!(
             Money::new(1, &JPY as &dyn Currency).convert(&exchange_rate),
-            Err(MoneyConversionError::InvalidExchangeRate("USD", "JPY"))
+            Err(MoneyConversionError::IncorrectExchangeRate("USD", "JPY"))
         );
     }
 }
