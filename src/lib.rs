@@ -110,6 +110,22 @@
 //!
 //! ## Changes from Previous Versions
 //!
+//! ### Version 3.1.0 -> 3.2.0
+//! - New `ExchangeRate` type for representing an exchange
+//!   rate from one currency to another, and a new
+//!   `convert(ExchangeRate)` method to perform the conversion.
+//!   Currently the rates are only unidirectional, as it's
+//!   common for markets to offer different rates for a currency
+//!   pair depending on the conversion direction (i.e., the rate
+//!   for converting USD to EUR will be slightly different than
+//!   the reciprocal of the rate for converting EUR to USD,
+//!   to allow for profit).
+//!
+//! ### Version 3.0.0 -> 3.1.0
+//! - You can now divide two `Money` instances of the same
+//!   currency to get a Decimal representing the percentage
+//!   difference between the two amounts.
+//!
 //! ### Version 2.0.0 -> 3.0.0
 //! - The `round()` method now rounds the amount to the
 //!   currency's number of minor units by default.
@@ -156,8 +172,8 @@ use serde::{ser::SerializeStruct, Serialize};
 pub use rust_decimal::RoundingStrategy;
 
 pub mod currency_map;
-pub mod iso_currencies;
 pub mod exchange;
+pub mod iso_currencies;
 
 #[cfg(feature = "formatting")]
 pub mod formatting;
