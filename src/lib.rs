@@ -157,6 +157,7 @@ pub use rust_decimal::RoundingStrategy;
 
 pub mod currency_map;
 pub mod iso_currencies;
+pub mod exchange;
 
 #[cfg(feature = "formatting")]
 pub mod formatting;
