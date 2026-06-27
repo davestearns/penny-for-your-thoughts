@@ -673,6 +673,10 @@ pub struct DeserializedMoney {
 You can then resolve the `code` to the appropriate `&dyn Currency` and construct
 a `Money` instance using that.
 
+If your app is only using the ISO-defined currencies, you can use the 
+`iso_currencies::find()` method to get a `&dyn Currency` from an alphabetic
+ISO currency code.
+
 ## Marker Trait for New
 
 When we first saw the `Money::new()` method, I noted that it technically allows
