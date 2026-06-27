@@ -1266,4 +1266,14 @@ mod tests {
             m.to_minor_units(RoundingStrategy::MidpointNearestEven)
         );
     }
+
+    #[test]
+    fn iso_currencies_find() {
+        assert_eq!(iso_currencies::find("USD"), Some(&USD as &dyn Currency));
+    }
+
+    #[test]
+    fn iso_currencies_find_not_found() {
+        assert_eq!(iso_currencies::find("INVALID"), None);
+    }
 }
