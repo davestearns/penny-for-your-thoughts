@@ -112,8 +112,8 @@
 //!
 //! ### Version 3.0.0 -> 3.1.0
 //! - `iso_currencies::find()` can be used to find the `Currency`
-//!    implementation for a given ISO currency code, or `None`
-//!    if no currency is defined for that code.
+//!   implementation for a given ISO currency code, or `None`
+//!   if no currency is defined for that code.
 //!
 //! ### Version 2.0.0 -> 3.0.0
 //! - The `round()` method now rounds the amount to the
