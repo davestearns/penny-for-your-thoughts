@@ -38,8 +38,7 @@ I wanted a Money data type that offered the following features:
   number of minor units, as
   [Iceland did in 2007](https://www.ibm.com/support/pages/apar/PK52556). It also
   makes it difficult to represent fractional minor units, such as a stock price
-  expressed in eighths of a cent, or a per-second usage price for a cloud
-  resource.
+  or a per-second usage price for a cloud resource.
 - **Supports instances with statically-typed currencies:** In some applications
   you know the currency at compile time, and you want to ensure that an amount
   of `Money` in one currency can't accidentally be passed to a function
